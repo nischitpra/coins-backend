@@ -1,4 +1,5 @@
 const network = require('../constants').network
+const id = require('../constants').id
 const connection = require('../connection')
 class CryptoSocket{
     constructor(from,to,client_socket){
@@ -18,7 +19,7 @@ class CryptoSocket{
               this.isSubscribed=true
             });
             this.cc_socket.on('m', (trade)=>{
-                this.client_socket.emit('news',trade)
+                this.client_socket.emit([id.cryptocompare.serverEvent],trade)
             })
             
           }

@@ -6,7 +6,7 @@ var router = express.Router();
 /* GET home page. */
 router.get('/', function(req, res, next) {
   console.log('getting from homepage')
-  news.getNews(req.query._i,req.query.c,req.query.p, (data)=>
+  news.getNews(req.query.i,req.query.c,req.query.p, (data)=>
     res.json({
       status:'200',
       message: data

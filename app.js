@@ -8,11 +8,21 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var cryptoCompare = require('./routes/CryptoCompare/cryptoCompare')
+var twitter = require('./routes/Twitter/twitter')
 
 const connection=require('./routes/connection')
 const id=require('./routes/constants').id
 const network=require('./routes/constants').network
 const CryptoSocket=require('./routes/CryptoCompare/CryptoSocket')
+
+var cors = require('cors')
+var corsOptions = {
+  origin: 'http://localhost:3000',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204 
+}
+
+
+
 
 var app = express();
 
@@ -28,9 +38,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-app.use('/users', users);
-app.use('/cc',cryptoCompare);
+app.use('/',cors(corsOptions), index);
+app.use('/users',cors(corsOptions), users);
+app.use('/cc',cors(corsOptions),cryptoCompare);
+app.use('/twitter',cors(corsOptions),twitter);
+
 
 
 // catch 404 and forward to error handler
@@ -63,13 +75,12 @@ var cryptoSocketList={}
 io.on('connection',(client_socket)=>{
   console.log('there was a connection')
   
-  client_socket.on('po',(data)=>{
+  client_socket.on(id.cryptocompare.clientEvent,(data)=>{
     console.log(data)
-    data=JSON.parse(data)
     const from=data.from
     const to=data.to
     const key=`${from}_${to}`
-    client_socket.emit('news', key)
+    // client_socket.emit(id.cryptocompare.serverEvent, key)
 
     if(data.un=='1' && cryptoSocketList[key]!=undefined && cryptoSocketList[key]!=null){
       console.log('unsubscibe from cryptocompare socket')
@@ -83,6 +94,8 @@ io.on('connection',(client_socket)=>{
     
   });
 });
+
+
 
 
 

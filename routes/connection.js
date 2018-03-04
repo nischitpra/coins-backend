@@ -10,10 +10,10 @@ module.exports={
         fetch(network.news(type,count,page),{
             method: 'GET',
             headers: {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
-            "Accept": 'application/json',
-            "X-API-Key": values.news.apiKey
-            }
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
+                "Accept": 'application/json',
+                "X-API-Key": values.news.apiKey
+            },
         }).then(response=>{
             console.log('data fetched')
             if(response.ok){
@@ -32,13 +32,10 @@ module.exports={
         console.log(network.history(type,from,to,exchange,toTime))
         fetch(network.history(type,from,to,exchange,toTime),{
             method: 'GET',
-            headers: {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
-            "Accept": 'application/json',
-            }
+            headers: values.baseHeader,
         }).then(response=>{
             response.json().then(json=>{
-                callback(type,json[id.cryptocompare.data])
+                callback(json[id.cryptocompare.data])
             })
         }).catch((error)=>{
             callback(string.someWrong,string.someWrong)
@@ -50,10 +47,7 @@ module.exports={
         console.log(network.favourites(from,to,exchange))
         fetch(network.favourites(from,to,exchange),{
             method: 'GET',
-            headers: {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
-            "Accept": 'application/json',
-            }
+            headers: values.baseHeader,
         }).then(response=>{
             response.json().then(json=>{
                 callback(json[id.cryptocompare.raw])
@@ -68,10 +62,7 @@ module.exports={
         console.log(network.coinList)
         fetch(network.coinList,{
             method: 'GET',
-            headers: {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
-            "Accept": 'application/json',
-            }
+            headers: values.baseHeader,
         }).then(response=>{
             response.json().then(json=>{
                 callback(Object.values(json[id.cryptocompare.data]),json[id.cryptocompare.baseImageUrl])
@@ -86,10 +77,7 @@ module.exports={
         console.log(network.socketSubsList(from,to))
         fetch(network.socketSubsList(from,to),{
             method: 'GET',
-            headers: {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
-            "Accept": 'application/json',
-            }
+            headers: values.baseHeader,
         }).then(response=>{
             response.json().then(json=>{
                 callback(json[to][id.cryptocompare.trades])
@@ -101,6 +89,15 @@ module.exports={
     },
 
 
-    
+    searchTweets(client,name,symbol,callback){
+        console.log(network.searchTweet(name,symbol))
+        client.get('search/tweets', {q: `${symbol}%20${name}`})
+        .then(function (tweet) {
+            callback(tweet)
+        })
+        .catch(function (error) {
+            console.log(error)
+        })
+    },
 
 }

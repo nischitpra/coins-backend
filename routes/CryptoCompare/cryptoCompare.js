@@ -12,14 +12,14 @@ router.get('/history', function(req, res, next) {
     const from=req.query[id.cryptocompare.from]
     const to=req.query[id.cryptocompare.to]
     const exchange=req.query[id.cryptocompare.exchange]
-    const historyType=req.query[id.cryptocompare.historyType]
+    const historyType=parseInt(req.query[id.cryptocompare.historyType])
     const fromTime=req.query[id.cryptocompare.fromTime]
     const toTime=req.query[id.cryptocompare.toTime]
 
     presenter.getHistory(historyType,from,to,exchange,fromTime,toTime,
-        (type,data)=>res.json({
+        (data)=>res.json({
             status:'200',
-            [id.cryptocompare.historyType]:type,
+            [id.cryptocompare.historyType]:historyType,
             message: data
         })
     )
