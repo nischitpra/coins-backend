@@ -33,8 +33,8 @@ router.get('/favourites', function(req, res, next) {
     const exchange=req.query[id.cryptocompare.exchange]
 
     presenter.getFavourites(from,to,exchange,
-        (data)=>res.json({
-            status:'200',
+        (status,data)=>res.json({
+            status:status,
             message: data
         })
     )

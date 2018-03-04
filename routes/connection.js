@@ -50,10 +50,14 @@ module.exports={
             headers: values.baseHeader,
         }).then(response=>{
             response.json().then(json=>{
-                callback(json[id.cryptocompare.raw])
+                if(json[id.cryptocompare.raw]===undefined){
+                    callback(values.status.error,[])
+                }else{
+                    callback(values.status.ok,json[id.cryptocompare.raw])
+                }
             })
         }).catch((error)=>{
-            callback(string.someWrong,string.someWrong)
+            callback(values.status.error,string.someWrong)
             console.log(error)
         })
     },

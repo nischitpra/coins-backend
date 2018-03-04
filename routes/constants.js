@@ -25,6 +25,10 @@ module.exports = {
             accessTokenKey: '941802374707822592-kLwiBWC7k6Bdqu2Gg5NkFymyKtOJbfU',
             accessTokenSecret: '7HTsCnI7M3IJeb4wkWomngCYQb6AHwyoSilvhLD3kXywH',
         },
+        status:{
+            ok:'ok',
+            error:'error',
+        }
     },
     id:{
         news:{everything:0,headlines:1,articles:'articles'},
