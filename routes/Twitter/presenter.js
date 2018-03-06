@@ -17,5 +17,8 @@ module.exports={
         console.log(`getting tweet for ${symbol}`)
         connection.searchTweets(client,name,symbol,callback)
     },
+    saveTweet(data){
+
+    }
    
 }

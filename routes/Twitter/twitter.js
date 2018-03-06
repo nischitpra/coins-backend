@@ -13,10 +13,10 @@ router.get('/q', function(req, res, next) {
     const coinName=req.query[id.twitter.coinName]
 
     presenter.searchTweets(coinName,symbol,
-        (data)=>res.json({
-            status:'200',
+        (status,data)=>res.json({
+            status:status,
             [id.twitter.symbol]:symbol,
-            message: data[id.twitter.statuses]
+            message: data
         })
     )
 });

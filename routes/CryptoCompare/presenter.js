@@ -1,5 +1,6 @@
 const id = require('../constants').id
 const string = require('../constants').string
+const values = require('../constants').values
 const connection = require('../connection')
 
 
@@ -10,7 +11,7 @@ module.exports={
         }else if(toTime==null){
             this.getNewHistory(type,from,to,exchange,fromTime,callback)
         }else{
-            callback(string.invalidRequest)
+            callback(values.status.error,[])
         }
         
     },
