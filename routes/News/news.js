@@ -1,18 +1,18 @@
-const connection = require('../connection')
-const constants = require('../constants')
-const id = constants.id
-const values = constants.values
-const string = constants.string
+var express = require('express');
+var router = express.Router();
+const presenter = require('./presenter')
 
-module.exports={
-    getNews(_id,count,page,callback){
-        console.log('get news')
-        if(_id==id.news.everything){
-            connection.getNews(values.news.everything,count,page,callback)
-        }else if(_id==id.news.headlines){
-            connection.getNews(values.news.headlines,count,page,callback)
-        }else{
-            callback(string.invalidRequest)
-        }
-    },
-}
+/* GET news. */
+router.get('/', function(req, res, next) {
+    console.log('getting news')
+    presenter.getNews(req.query.i,req.query.c,req.query.p, (status,data)=>
+    res.json({
+        status:status,
+        message: data
+      })
+    )
+  });
+
+
+
+module.exports=router

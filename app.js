@@ -8,24 +8,18 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var cryptoCompare = require('./routes/CryptoCompare/cryptoCompare')
-var twitter = require('./routes/Twitter/twitter')
+var twitter = require('./routes/twitter/twitter')
+var news = require('./routes/news/news')
+var mailer = require('./routes/mailer/mailer')
 
 const connection=require('./routes/connection')
 const id=require('./routes/constants').id
 const network=require('./routes/constants').network
-const CryptoSocket=require('./routes/CryptoCompare/CryptoSocket')
+const CryptoSocket=require('./routes/cryptocompare/cryptoSocket')
 
-var cors = require('cors')
-var corsOptions = {
-  origin: 'http://localhost:3000',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204 
-}
-
-
-
+const database = require('./routes/database')
 
 var app = express();
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -38,10 +32,19 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+/** setting up cors options */
+var cors = require('cors')
+var corsOptions = {
+  origin: 'http://localhost:3000',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204 
+}
+
+
 app.use('/',cors(corsOptions), index);
-app.use('/users',cors(corsOptions), users);
+app.use('/news',cors(corsOptions), news);
 app.use('/cc',cors(corsOptions),cryptoCompare);
 app.use('/twitter',cors(corsOptions),twitter);
+app.use('/mailer',cors(corsOptions),mailer)
 
 
 

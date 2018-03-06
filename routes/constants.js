@@ -7,6 +7,9 @@ module.exports = {
         socketSubsList:(from,to)=>`https://min-api.cryptocompare.com/data/subs?fsym=${from}&tsyms=${to}`,
         cryptocompareWebSocket:`https://streamer.cryptocompare.com/`,
         searchTweet:(name,symbol)=>`https://api.twitter.com/1.1/search/tweets.json?q=${name}%20${symbol}%20crypto%blockchain&result_type=mixed`,
+        
+        subscribeOtp:(email,from,to,otp)=>`http://localhost:3001/mailer/subscribe/validate?email=${email}&from=${from}&to=${to}&otp=${otp}`,
+        database:`mongodb://localhost:27017/`,
     },
     values:{
         baseHeader:{
@@ -31,6 +34,16 @@ module.exports = {
         }
     },
     id:{
+        application:{db:'db'},
+        database:{
+            name:'coins',
+            collection:{otp:'otp',subscribed:'subscribed'},
+            email:'email',
+            from:'from',
+            to:'to',
+            createdAt:'createdAt',
+            isDeleted:'isDeleted',
+        },
         news:{everything:0,headlines:1,articles:'articles'},
         cryptocompare:{
             history:{0:'histominute',1:'histohour',2:'histoday'},
@@ -51,9 +64,32 @@ module.exports = {
             symbol:'symbol',
             statuses:'statuses',
             coinName:'coinName',
-        }
+        },
+        mailer:{
+            email:'email',
+            from:'from',
+            to:'to',
+            otp:'otp',
+            subscribe:{
+                key:'key',
+                otp:'otp',
+                createdAt:'createdAt',
+                validationSuccess:true,
+                validationError:false,
+            },
+        },
     },
     string:{
+        subscribe:{
+            optSent:(email)=>`Otp has been sent to ${email}`,
+            otpEmail:(otp,url)=>`Please click on the following link to subscribe \n${url}`,
+            subscribedMessage:(from,to)=>`You have just subscribed to email alerts for ${from}:${to} trend changes`,
+            subscribed:(from,to)=>`You have been subscribed`,
+            requestSubscriptionBody:(otp)=>`Your OTP for subscription is: ${otp}`,
+            unsubscribed:`You have been unsubscribed`,
+            unsubscribedMessage:(from,to)=>`You have unsubscribed email alerts for ${from}:${to}`,
+            requestSubscription:`Verification for subscription`,
+        },
         invalidRequest:'Invalid Request',
         someWrong:'Woops, something went wrong!',
     },

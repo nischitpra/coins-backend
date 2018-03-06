@@ -17,8 +17,8 @@ router.get('/history', function(req, res, next) {
     const toTime=req.query[id.cryptocompare.toTime]
 
     presenter.getHistory(historyType,from,to,exchange,fromTime,toTime,
-        (data)=>res.json({
-            status:'200',
+        (status,data)=>res.json({
+            status:status,
             [id.cryptocompare.historyType]:historyType,
             message: data
         })
@@ -44,8 +44,8 @@ router.get('/favourites', function(req, res, next) {
 /* GET coinlist. */
 router.get('/coinlist', function(req, res, next) {
     presenter.getCoinList(
-        (data,baseImageUrl)=>res.json({
-            status:'200',
+        (status,data,baseImageUrl)=>res.json({
+            status:status,
             message: data,
             baseImageUrl:baseImageUrl,
         })
@@ -59,8 +59,8 @@ router.get('/subs', function(req, res, next) {
     const to=req.query[id.cryptocompare.to]
 
     presenter.getSubsList(from,to,
-        (data,baseImageUrl)=>res.json({
-            status:'200',
+        (status,data)=>res.json({
+            status:status,
             message: data,
         })
     )

@@ -19,11 +19,11 @@ module.exports={
             if(response.ok){
                 response.json().then(json=>{
                     console.log('sending data back')
-                    callback(json[id.news.articles])
+                    callback(values.status.on,json[id.news.articles])
                 })
             }
         }).catch((error)=>{
-            callback(string.someWrong,string.someWrong)
+            callback(values.status.error,[])
             console.log(error)
         })
     },
@@ -35,10 +35,10 @@ module.exports={
             headers: values.baseHeader,
         }).then(response=>{
             response.json().then(json=>{
-                callback(json[id.cryptocompare.data])
+                callback(values.status.ok,json[id.cryptocompare.data])
             })
         }).catch((error)=>{
-            callback(string.someWrong,string.someWrong)
+            callback(values.status.error,[])
             console.log(error)
         })
     },
@@ -69,11 +69,11 @@ module.exports={
             headers: values.baseHeader,
         }).then(response=>{
             response.json().then(json=>{
-                callback(Object.values(json[id.cryptocompare.data]),json[id.cryptocompare.baseImageUrl])
+                callback(values.status.ok,Object.values(json[id.cryptocompare.data]),json[id.cryptocompare.baseImageUrl])
             })
         }).catch((error)=>{
-            callback(string.someWrong,string.someWrong)
-            console.log(error)
+            callback(values.status.error,[],'')
+            console.log(values.status.error)
         })
     },
 
@@ -84,10 +84,10 @@ module.exports={
             headers: values.baseHeader,
         }).then(response=>{
             response.json().then(json=>{
-                callback(json[to][id.cryptocompare.trades])
+                callback(values.status.ok,json[to][id.cryptocompare.trades])
             })
         }).catch((error)=>{
-            callback(string.someWrong,string.someWrong)
+            callback(values.status.error,[])
             console.log(error)
         })
     },
@@ -96,11 +96,12 @@ module.exports={
     searchTweets(client,name,symbol,callback){
         console.log(network.searchTweet(name,symbol))
         client.get('search/tweets', {q: `${symbol}%20${name}`})
-        .then(function (tweet) {
-            callback(tweet)
+        .then((tweet)=>{
+            callback(values.status.ok,tweet[id.twitter.statuses])
         })
-        .catch(function (error) {
-            console.log(error)
+        .catch((error)=>{
+            console.log('search tweet error')
+            callback(values.status.error,[])
         })
     },
 
