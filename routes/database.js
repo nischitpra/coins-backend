@@ -27,13 +27,18 @@ module.exports={
             });
         })
     },
-    findOne(collection,query){
+    findOne(collection,query,callback){
         MongoClient.connect(network.database,(err, db)=>{
             if (err) throw err;
             var dbo = db.db(id.database.name);
             dbo.collection(collection).findOne(query,(err, result)=>{
                 if (err) throw err;
                 console.log(result)
+                if(result!=null){
+                    callback(true)
+                }else{
+                    callback(false)
+                }
                 db.close();
             });
         });

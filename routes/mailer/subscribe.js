@@ -78,7 +78,11 @@ module.exports={
         return re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     },
     saveSubscription(email,from,to){
-        db.insertOne(id.database.collection.subscribed,{[id.database.email]:utils.base64(email),[id.database.from]:from,[id.database.to]:to,[id.database.createdAt]:new Date().getTime(),[id.database.isDeleted]:false})
+        db.findOne(id.database.collection.subscribed,{[id.database.email]:utils.base64(email),[id.database.from]:from,[id.database.to]:to,[id.database.isDeleted]:false},(exists)=>{
+            if(!exists){
+                db.insertOne(id.database.collection.subscribed,{[id.database.email]:utils.base64(email),[id.database.from]:from,[id.database.to]:to,[id.database.createdAt]:new Date().getTime(),[id.database.isDeleted]:false})
+            }
+        })
     },
 
     generateKey(user,from,to){

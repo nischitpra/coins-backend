@@ -82,7 +82,7 @@ module.exports = {
     string:{
         subscribe:{
             optSent:(email)=>`Otp has been sent to ${email}`,
-            otpEmail:(otp,url)=>`Please click on the following link to subscribe \n${url}`,
+            otpEmail:(otp,url)=>`Your OTP is ${otp}. You can enter the otp or simply click on the following link to subscribe \n\n\n${url}`,
             subscribedMessage:(from,to)=>`You have just subscribed to email alerts for ${from}:${to} trend changes`,
             subscribed:(from,to)=>`You have been subscribed`,
             requestSubscriptionBody:(otp)=>`Your OTP for subscription is: ${otp}`,
