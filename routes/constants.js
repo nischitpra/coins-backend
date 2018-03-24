@@ -11,6 +11,14 @@ module.exports = {
         subscribeOtp:(email,from,to,otp)=>`http://localhost:3001/mailer/subscribe/validate?email=${email}&from=${from}&to=${to}&otp=${otp}`,
         database:`mongodb://localhost:27017/`,
     },
+    files:{
+        python:{
+            compiler:'/usr/local/Cellar/python/3.6.4_2/bin/python3.6',
+            sentimentTrend:`pythonscript/sentiment_trend.py`,
+        },
+        buildPath:(pathFromBin)=>`/Users/oyo/Desktop/express/coins/routes/bin/${pathFromBin}`,
+    },
+
     values:{
         baseHeader:{
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",

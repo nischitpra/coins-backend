@@ -21,6 +21,16 @@ router.get('/q', function(req, res, next) {
     )
 });
 
+router.get('/sentiment',function(req, res, next) {
+    const pythoninvoker=require('../../routes/pythoninvoker')
+    pythoninvoker.getSentimentTrend((status,data)=>{
+        res.json({
+            status:status,
+            message: data
+        })
+    })
+});
+
 
   
 
