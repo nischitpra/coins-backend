@@ -20,14 +20,14 @@ module.exports={
     },
     sendMailOtp(user,from,to,otp,subject,message,callback){
         var transporter = nodemailer.createTransport({
-            service: 'Gmail',
+            service: values.mailer.server.name,
             auth: {
-                user: 'nischitpra@gmail.com',
-                pass: 'Applebob123'
+                user:  values.mailer.server.email,
+                pass: values.mailer.server.password
             }
         });
         transporter.sendMail({
-        from: 'nischitpra@gmail.com',
+        from: values.mailer.server.email,
           to: user,
           subject: subject,
           text: message,
@@ -41,14 +41,14 @@ module.exports={
     },
     sendMail(user,subject,message,callback){
         var transporter = nodemailer.createTransport({
-            service: 'Gmail',
+            service: values.mailer.server.name,
             auth: {
-                user: 'nischitpra@gmail.com',
-                pass: 'Applebob123'
+                user:  values.mailer.server.email,
+                pass: values.mailer.server.password
             }
         });
         transporter.sendMail({
-        from: 'nischitpra@gmail.com',
+        from: values.mailer.server.email,
           to: user,
           subject: subject,
           text: message,

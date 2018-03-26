@@ -15,6 +15,7 @@ module.exports = {
         python:{
             compiler:'/usr/local/Cellar/python/3.6.4_2/bin/python3.6',
             sentimentTrend:`pythonscript/sentiment_trend.py`,
+            filterTweet:`pythonscript/filter_tweet.py`,
         },
         buildPath:(pathFromBin)=>`/Users/oyo/Desktop/express/coins/routes/bin/${pathFromBin}`,
     },
@@ -39,13 +40,17 @@ module.exports = {
         status:{
             ok:'ok',
             error:'error',
+        },
+        mailer:{
+            server:{name:'Gmail',email:'nischitpra@gmail.com',password:'Applebob123'},
         }
+
     },
     id:{
         application:{db:'db'},
         database:{
             name:'coins',
-            collection:{otp:'otp',subscribed:'subscribed'},
+            collection:{otp:'otp',subscribed:'subscribed',tweets:'tweets'},
             email:'email',
             from:'from',
             to:'to',
@@ -100,6 +105,10 @@ module.exports = {
         },
         invalidRequest:'Invalid Request',
         someWrong:'Woops, something went wrong!',
+        tweets:{
+            updated:(count)=>`${count} tweets downloaded`,
+        },
+        inserted:(count)=>`${count} items added!`,
     },
 }
 

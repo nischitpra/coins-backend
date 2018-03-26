@@ -16,14 +16,19 @@ module.exports={
             });
         })
     },
-    insertMany(collection,value){
+    insertMany(collection,value,callback){
         MongoClient.connect(network.database,(err, db)=>{
             if (err) throw err;
             var dbo = db.db(id.database.name);
             dbo.collection(collection).insertMany(value, (err, res)=>{
-                if (err) throw err;
-                console.log(`${value.length} document inserted`);
-                db.close();
+                if (err) {
+                    callback(values.status.error,string.someWrong)
+                    throw err;
+                }else{
+                    console.log(`${value.length} document inserted`);
+                    db.close();
+                    callback(values.status.ok,string.inserted(value.length))
+                }
             });
         })
     },
@@ -43,12 +48,16 @@ module.exports={
             });
         });
     },
-    findMany(collection,query){
+    findMany(collection,query,callback){
         MongoClient.connect(network.database,(err, db)=>{
             if (err) throw err;
             var dbo = db.db(id.database.name);
             dbo.collection(collection).find(query).toArray((err, result)=>{
-                if (err) throw err;
+                if (err){
+                    callback(values.status.error,string.someWrong)
+                    throw err;
+                }
+                callback(values.status.ok,result)
                 db.close();
             });
         });
