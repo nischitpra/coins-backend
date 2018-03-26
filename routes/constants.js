@@ -16,6 +16,7 @@ module.exports = {
             compiler:'/usr/local/Cellar/python/3.6.4_2/bin/python3.6',
             sentimentTrend:`pythonscript/sentiment_trend.py`,
             filterTweet:`pythonscript/filter_tweet.py`,
+            goodBadTweet:`pythonscript/good_bad_tweet.py`,
         },
         buildPath:(pathFromBin)=>`/Users/oyo/Desktop/express/coins/routes/bin/${pathFromBin}`,
     },
@@ -50,7 +51,7 @@ module.exports = {
         application:{db:'db'},
         database:{
             name:'coins',
-            collection:{otp:'otp',subscribed:'subscribed',tweets:'tweets'},
+            collection:{otp:'otp',subscribed:'subscribed',tweets:'tweets',goodBadTweets:'goodBadTweets'},
             email:'email',
             from:'from',
             to:'to',
@@ -77,6 +78,12 @@ module.exports = {
             symbol:'symbol',
             statuses:'statuses',
             coinName:'coinName',
+            tweet:{
+                text:'text',
+                index:'index',
+                timestamp:'timestamp',
+                createdAt:'created_at',
+            },
         },
         mailer:{
             email:'email',
@@ -102,6 +109,12 @@ module.exports = {
             unsubscribed:`You have been unsubscribed`,
             unsubscribedMessage:(from,to)=>`You have unsubscribed email alerts for ${from}:${to}`,
             requestSubscription:`Verification for subscription`,
+            
+        },
+        database:{
+            insert:{
+                emptyList:`Trying to insert empty list.`
+            }
         },
         invalidRequest:'Invalid Request',
         someWrong:'Woops, something went wrong!',

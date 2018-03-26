@@ -11,8 +11,28 @@ module.exports={
         presenter.searchTweets('btc','bitcoin',(status,data)=>{
             var preparedList=presenter.preFilterTweetsList(data)
             pythoninvoker.getFilteredTweet(JSON.stringify(preparedList),(status,filteredData)=>{
-                db.insertMany(id.database.collection.tweets,filteredData,(status,message)=>callback(status,message))
+                filteredData=presenter.postFilterTweetsList(data,filteredData)
+                if(filteredData.length>0){
+                    db.insertMany(id.database.collection.tweets,filteredData,(status,message)=>callback(status,message))
+                }else{
+                    callback(values.status.error,string.database.insert.emptyList)
+                }
             })
         })
     },
+    updateGoodBadTweets(callback){
+        presenter.getTweetsDb((status,data)=>{
+            var preparedList=presenter.preFilterTweetsList(data)
+            pythoninvoker.getGoodBadTweet(JSON.stringify(preparedList),(status,goodBadData)=>{
+                goodBadData=presenter.postFilterTweetsList(data,goodBadData)
+                if(goodBadData.length>0){
+                    db.insertMany(id.database.collection.goodBadTweets,goodBadData,(status,message)=>callback(status,message))
+                }else{
+                    callback(values.status.error,string.database.insert.emptyList)
+                }
+            })
+        })
+        
+    }
+   
 }

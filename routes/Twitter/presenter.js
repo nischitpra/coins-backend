@@ -3,6 +3,8 @@ const values = require('../constants').values
 const string = require('../constants').string
 const connection = require('../connection')
 const db = require('../database')
+const pythoninvoker=require('../../routes/pythoninvoker')
+
 
 /** twitter api */
 var Twitter = require('twitter');
@@ -14,8 +16,14 @@ var client = new Twitter({
 });
 
 module.exports={
-    getTweets(name,symbol,callback){
+    getSpecificTweetsDb(name,symbol,callback){
         console.log(`getting tweet for ${symbol}`)
+        db.findMany(id.database.collection.tweets,{[id.twitter.tweet.text] : {$regex : new RegExp( `${name}|${symbol}`, 'i')}},(status,data)=>{
+            callback(status,data)
+        })
+    },
+    getTweetsDb(callback){
+        console.log(`getting home tweets`)
         db.findMany(id.database.collection.tweets,{},(status,data)=>{
             callback(status,data)
         })
@@ -31,20 +39,29 @@ module.exports={
         list=[]
         for(var i in data){
             var item={}
-            item['text']=data[i]['text']
-            item['index']=i
+            item[id.twitter.tweet.index]=i
+            item[id.twitter.tweet.text]=data[i][id.twitter.tweet.text]
+            item[id.twitter.tweet.timestamp]=data[i][id.twitter.tweet.createdAt]
             list.push(item)
         }
         return list
     },
     postFilterTweetsList(data,filteredData){
-        return filteredData
         list=[]
+        console.log(`filtered data length: ${filteredData.length}`)
+        console.log(`${filteredData}`)
         for(var i in filteredData){
-            var item=data[filteredData[i]['index']]
+            var item=data[filteredData[i][id.twitter.tweet.index]]
             list.push(item)
         }
+        console.log(JSON.stringify(list))
         return list
     },
-   
+    getGoodBadTweetsDb(callback){
+        console.log(`getting good bad tweet`)
+        db.findMany(id.database.collection.goodBadTweets,{},(status,data)=>{
+            callback(status,data)
+        })
+    }
+    
 }

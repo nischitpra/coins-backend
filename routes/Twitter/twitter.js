@@ -25,10 +25,21 @@ const service = require('./service')
 //     )
 // });
 
+// for general search tweets
 router.get('/q', function(req, res, next) {
     const symbol=req.query[id.twitter.symbol]
     const coinName=req.query[id.twitter.coinName]
-    presenter.getTweets(coinName,symbol,(status,data)=>{
+    presenter.getSpecificTweetsDb(coinName,symbol,(status,data)=>{
+        res.json({
+            status:status,
+            message: data
+        })
+    })
+});
+
+// for home tweets
+router.get('/h', function(req, res, next) {
+    presenter.getTweetsDb((status,data)=>{
         res.json({
             status:status,
             message: data
@@ -45,7 +56,8 @@ router.get('/sentiment',function(req, res, next) {
     })
 });
 
-router.get('/updateDb',function(req, res, next) {
+// update tweet (after removing spams)
+router.get('/ut',function(req, res, next) {
     service.updateTweetDb((status,data)=>{
         res.json({
             status:status,
@@ -53,5 +65,26 @@ router.get('/updateDb',function(req, res, next) {
         })
     })
 });
+
+
+// update good bad tweet
+router.get('/ugb', function(req, res, next) {
+    service.updateGoodBadTweets((status,data)=>{
+        res.json({
+            status:status,
+            message: data
+        })
+    })
+});
+// get good bad tweets
+router.get('/ggb', function(req, res, next) {
+    presenter.getGoodBadTweetsDb((status,data)=>{
+        res.json({
+            status:status,
+            message: data
+        })
+    })
+});
+
 
 module.exports = router;

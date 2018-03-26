@@ -13,6 +13,8 @@ my_stop_words='to and http https com co www'
 stop_words=stop_words+my_stop_words.split()
 
 def preprocess(_df):
+    if 'text' not in _df:
+        return pd.DataFrame({'text':[]})
     _df['text']=_df['text'].apply(lambda tweet:str(tweet) if str(tweet).count('\n')<=3 else '')
     _df['text']=_df['text'].apply(lambda tweet:tweet if tweet.count('#')<=3 else '')
     _df['text']=_df['text'].apply(lambda tweet:re.sub('[^ ]+\.[^ ]+','',tweet))
