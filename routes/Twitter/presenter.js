@@ -39,7 +39,7 @@ module.exports={
         list=[]
         for(var i in data){
             var item={}
-            item[id.twitter.tweet.index]=i
+            item[id.twitter.tweet.id]=data[i][id.twitter.tweet.id]
             item[id.twitter.tweet.text]=data[i][id.twitter.tweet.text]
             item[id.twitter.tweet.timestamp]=data[i][id.twitter.tweet.createdAt]
             list.push(item)
@@ -49,12 +49,10 @@ module.exports={
     postFilterTweetsList(data,filteredData){
         list=[]
         console.log(`filtered data length: ${filteredData.length}`)
-        console.log(`${filteredData}`)
         for(var i in filteredData){
             var item=data[filteredData[i][id.twitter.tweet.index]]
             list.push(item)
         }
-        console.log(JSON.stringify(list))
         return list
     },
     getGoodBadTweetsDb(callback){
@@ -62,6 +60,26 @@ module.exports={
         db.findMany(id.database.collection.goodBadTweets,{},(status,data)=>{
             callback(status,data)
         })
-    }
+    },
+    streamTweets(name,symbol){
+        connection.streamTweets(client,name,symbol,this.saveTweetDb.bind(this)) // need to bind context 
+    },
+
+    /**
+     * Need to bind context for this function call as it uses the context(this.) to call functions
+     */
+    saveTweetDb(tweets){
+        console.log(`${tweets.length} tweets received`)
+        var preparedList=this.preFilterTweetsList(tweets)
+        pythoninvoker.getFilteredTweet(JSON.stringify(preparedList),(status,filteredData)=>{
+            filteredData=this.postFilterTweetsList(tweets,filteredData)
+            console.log(`${filteredData.length} tweets filtered`)
+            if(filteredData.length>0){
+                db.insertMany(id.database.collection.tweets,filteredData,(status,message)=>console.log(message))
+            }else{
+                console.log(string.database.insert.emptyList)
+            }
+        })
+    },
     
 }

@@ -8,23 +8,6 @@ const WebSocket = require('ws')
 const pythoninvoker=require('../../routes/pythoninvoker')
 const service = require('./service')
 
-/* GET search tweets. */
-// router.get('/q', function(req, res, next) {
-//     const symbol=req.query[id.twitter.symbol]
-//     const coinName=req.query[id.twitter.coinName]
-//     presenter.searchTweets(coinName,symbol,
-//         (status,data)=>{
-//             var preparedList=presenter.preFilterTweetsList(data)
-//             pythoninvoker.getFilteredTweet(JSON.stringify(preparedList),(status,filteredData)=>{
-//                 res.json({
-//                     status: status,
-//                     message: presenter.postFilterTweetsList(data,filteredData)
-//                 })
-//             })
-//         }
-//     )
-// });
-
 // for general search tweets
 router.get('/q', function(req, res, next) {
     const symbol=req.query[id.twitter.symbol]
@@ -58,12 +41,12 @@ router.get('/sentiment',function(req, res, next) {
 
 // update tweet (after removing spams)
 router.get('/ut',function(req, res, next) {
-    service.updateTweetDb((status,data)=>{
-        res.json({
-            status:status,
-            message: data
-        })
-    })
+    var symbol=req.query[id.twitter.symbol]
+    var coinName=req.query[id.twitter.coinName]
+    if(symbol==undefined||symbol==null) symbol="btc"
+    if(coinName==undefined||coinName==null) symbol="bitcoin"
+    service.updateTweetDb(coinName,symbol)
+    
 });
 
 
@@ -85,6 +68,5 @@ router.get('/ggb', function(req, res, next) {
         })
     })
 });
-
 
 module.exports = router;

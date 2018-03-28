@@ -91,8 +91,6 @@ module.exports={
             console.log(error)
         })
     },
-
-
     searchTweets(client,name,symbol,callback){
         console.log(network.searchTweet(name,symbol))
         client.get('search/tweets', {q: `${symbol}%20${name}`})
@@ -104,5 +102,23 @@ module.exports={
             callback(values.status.error,[])
         })
     },
-
+    streamTweets(client,name,symbol,callback){
+        var bufferTweets=[]
+        console.log('streaming tweets from twitter api')
+        client.stream('statuses/filter', {track: `${symbol}`},  function(stream) {
+            stream.on('data', function(tweet) {
+                bufferTweets.push(tweet)
+                console.log(bufferTweets.length);
+                console.log(tweet.text)
+                if(bufferTweets.length>50){
+                    console.log('--------------===========-------------')
+                    callback(bufferTweets)
+                    bufferTweets=[]
+                }
+            });
+            stream.on('error', function(error) {
+                console.log(error);
+            });
+        });
+    }
 }

@@ -18,7 +18,7 @@ module.exports = {
             filterTweet:`pythonscript/filter_tweet.py`,
             goodBadTweet:`pythonscript/good_bad_tweet.py`,
         },
-        buildPath:(pathFromBin)=>`/Users/oyo/Desktop/express/coins/routes/bin/${pathFromBin}`,
+        buildPath:(pathFromBin)=>`/Users/oyo/Desktop/awesome/express/coins/routes/bin/${pathFromBin}`,
     },
 
     values:{
@@ -80,6 +80,7 @@ module.exports = {
             coinName:'coinName',
             tweet:{
                 text:'text',
+                id:'_id',
                 index:'index',
                 timestamp:'timestamp',
                 createdAt:'created_at',

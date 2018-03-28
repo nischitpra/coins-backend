@@ -4,12 +4,15 @@ import pandas as pd
 import numpy as np
 import math
 from datetime import datetime
+import time
 import re
 from nltk.corpus import stopwords
 from nltk.stem.snowball import EnglishStemmer
 import pickle
 
-window_size=1*60*60*24 #1 day
+
+base_path='/Users/oyo/Desktop/awesome/tweets/'
+HISTORY_TYPE=1*60*60*24 #1 day
 
 
 stemmer = EnglishStemmer()
@@ -18,26 +21,19 @@ my_stop_words='to and http https com co www'
 stop_words=stop_words+my_stop_words.split()
 
 def preprocess(_df):
-    if 'text' not in _df:
-        return pd.DataFrame({'text':[]})
-    _df['text']=_df['text'].apply(lambda tweet:str(tweet) if str(tweet).count('\n')<=3 else '')
-    _df['text']=_df['text'].apply(lambda tweet:tweet if tweet.count('#')<=3 else '')
+    _df['text']=_df['text'].apply(lambda tweet:str(tweet).lower() if str(tweet).count('#')<=3 else '')
     _df['text']=_df['text'].apply(lambda tweet:re.sub('[^ ]+\.[^ ]+','',tweet))
-    _df['text']=_df['text'].apply(lambda tweet:re.sub('#[^ ]+','',tweet))
-    _df['text']=_df['text'].apply(lambda tweet:re.sub('[^a-zA-Z0-9 ]',' ',(tweet)))
-    _df['text']=_df['text'].apply(lambda tweet:' '.join([word.lower() for word in tweet.strip().split() if word.lower() not in stop_words]))
+#     _df['text']=_df['text'].apply(lambda tweet:re.sub('#[^ ]+','',tweet))
+    _df['text']=_df['text'].apply(lambda tweet:re.sub('[^a-zA-Z0-9.!? ]',' ',(tweet)))
+    _df['text']=_df['text'].apply(lambda tweet:' '.join([word for word in tweet.strip().split() if word not in stop_words]))
     _df['text']=_df['text'].apply(lambda tweet:stemmer.stem(tweet.strip()))
     return _df
 
 def time_to_milli(_time):
-    if (isinstance(_time,str)): 
-        return round(datetime.strptime(_time, '%Y-%m-%dT%H:%M:%S').timestamp())
-    else:
-        return -1
+    return round(_time.timestamp())
 
 def to_time(from_time,window_size):
-    history_type=window_size 
-    return from_time+window_size*history_type
+    return from_time+window_size*HISTORY_TYPE
 
 def slice_tweets(tweets,from_time):
     window_size=1
@@ -78,21 +74,25 @@ def sentiment(timestamp,df,opn):
     low = min(b, close, opn)
 
     opn=close
+
+    if proba_good_bad_actual_df.empty:
+        return None
+
     return [proba_good_bad_actual_df,high,low,close]
 
 # Twitter Dataset
 # tweet_dataset=pd.read_csv('dataset/csv/filter_dataset/proba_filtered_dataset.csv',encoding = 'utf8')
 tweet_dataset=pd.read_json(sys.argv[1],encoding = 'utf8')
+# tweet_dataset=pd.read_json('[{"text":"CBOE Nudges SEC to Allow Bitcoin ETFs in New Letter","timestamp":"Tue Mar 27 13:39:58 +0000 2018","index":0}]',encoding = 'utf8')
 tweet_dataset['timestamp'] = [time_to_milli(_time) for _time in tweet_dataset['timestamp']] 
 tweet_df = tweet_dataset.sort_values(['timestamp'], ascending=True)
-
 # Saved Model
-classifier = pickle.load(open('/Users/oyo/Desktop/tweets/saved_classifier/good_bad_classifier.sav', 'rb'))
+classifier = pickle.load(open(base_path+'saved_classifier/good_bad_classifier.sav', 'rb'))
 
 # Main Loop
 current_date=tweet_df['timestamp'].iloc[0]
 last_date=tweet_df['timestamp'].iloc[-1]
-step=window_size
+step=HISTORY_TYPE
 
 senti_close=[]
 senti_open=[]
@@ -102,23 +102,25 @@ time_list=[]
 opn=0
 close=0
 
-gb_json_list=[]
+final_df=pd.DataFrame()
 
-for time_milli in range(current_date,last_date,step):
+for time_milli in range(current_date,last_date+step,step):
     day_tweets=slice_tweets(tweet_df,current_date)
     #Preprocess
     day_tweets=preprocess(day_tweets)
     day_tweets=day_tweets[day_tweets['text']!='']
     day_tweets=day_tweets[day_tweets['timestamp']>0]
+
     
     x=sentiment(current_date,day_tweets.copy(),opn)
+
     if x!=None:
         [good_bad_df,high,low,close]=x
     else:
         current_date=to_time(current_date,1)
         continue
         
-    gb_json_list.append(good_bad_df.to_json(orient='records'))
+    final_df=pd.concat([final_df,good_bad_df])
     
     senti_open.append(opn)
     senti_high.append(high)
@@ -135,7 +137,9 @@ senti_df['open'] = senti_open
 senti_df['high'] = senti_high
 senti_df['low'] = senti_low
 senti_df['time'] = time_list
-senti_df.to_csv('/Users/oyo/Desktop/tweets/dataset/csv/good_bad/sentiment_trend.csv', sep=',', index=False)
+senti_df.to_csv(base_path+'dataset/csv/good_bad/sentiment_trend.csv', sep=',', index=False)
 
-print(json.dumps(gb_json_list))
+final_df.to_csv(base_path+'dataset/csv/good_bad/gb_filter/{}.csv'.format(round(time.time())), sep=',', index=False)
+
+print('{} tweets filtered.'.format(final_df.shape[0]))
 sys.stdout.flush()

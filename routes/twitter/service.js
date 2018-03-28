@@ -7,32 +7,28 @@ const string = require('../constants').string
 const pythoninvoker=require('../../routes/pythoninvoker')
 
 module.exports={
-    updateTweetDb(callback){
-        presenter.searchTweets('btc','bitcoin',(status,data)=>{
-            var preparedList=presenter.preFilterTweetsList(data)
-            pythoninvoker.getFilteredTweet(JSON.stringify(preparedList),(status,filteredData)=>{
-                filteredData=presenter.postFilterTweetsList(data,filteredData)
-                if(filteredData.length>0){
-                    db.insertMany(id.database.collection.tweets,filteredData,(status,message)=>callback(status,message))
-                }else{
-                    callback(values.status.error,string.database.insert.emptyList)
-                }
-            })
-        })
+    updateTweetDb(name,symbol){
+        presenter.streamTweets(name,symbol)
     },
     updateGoodBadTweets(callback){
         presenter.getTweetsDb((status,data)=>{
             var preparedList=presenter.preFilterTweetsList(data)
+            console.log(`${preparedList.length} records`)
             pythoninvoker.getGoodBadTweet(JSON.stringify(preparedList),(status,goodBadData)=>{
-                goodBadData=presenter.postFilterTweetsList(data,goodBadData)
-                if(goodBadData.length>0){
-                    db.insertMany(id.database.collection.goodBadTweets,goodBadData,(status,message)=>callback(status,message))
-                }else{
-                    callback(values.status.error,string.database.insert.emptyList)
-                }
+                // console.log(`returned good bad data length: ${goodBadData.length}`)
+                callback(values.status.ok,goodBadData)
+                // goodBadData=presenter.postFilterTweetsList(data,goodBadData)
+                // if(goodBadData.length>0){
+                //     console.log(`we have ${goodBadData.length} data to insert`)
+                //     db.insertMany(id.database.collection.goodBadTweets,goodBadData,(status,message)=>callback(status,message))
+                // }else{
+                //     console.log(`no data to insert`)
+                //     callback(values.status.error,string.database.insert.emptyList)
+                // }
             })
         })
         
     }
+
    
 }

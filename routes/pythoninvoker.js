@@ -29,7 +29,7 @@ module.exports={
         })
 
         process.stderr.on('data',(error)=>{
-            console.log('some error occured')
+            console.log(error.toString('utf8'))
             callback(values.status.error,error.toString('utf8'))
         })
     },
@@ -38,13 +38,14 @@ module.exports={
         var process = spawn(files.python.compiler,[files.buildPath(files.python.goodBadTweet),tweets] )
         console.log('get good bad tweet process spawned')
         process.stdout.on('data', (data)=>{
-            console.log('trend returned from python')
-            callback(values.status.ok,JSON.parse(data.toString('utf8')))
+            console.log('returned good bad from python')
+            callback(values.status.ok,data.toString('utf8'))
         })
 
         process.stderr.on('data',(error)=>{
-            console.log('some error occured')
-            callback(values.status.error,error.toString('utf8'))
+            console.log('---ERROR-----')
+            console.log(error.toString('utf8'))
+            console.log('=============')
         })
     },
 }
