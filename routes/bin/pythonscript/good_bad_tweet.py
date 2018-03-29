@@ -9,7 +9,7 @@ from nltk.corpus import stopwords
 from nltk.stem.snowball import EnglishStemmer
 import pickle
 from pymongo import MongoClient
-
+from bson.objectid import ObjectId
 
 base_path='/Users/oyo/Desktop/awesome/tweets/'
 HISTORY_TYPE=1*60*60*24 #1 day
