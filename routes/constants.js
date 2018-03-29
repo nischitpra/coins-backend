@@ -48,10 +48,11 @@ module.exports = {
 
     },
     id:{
+        params:{ count:'count', },
         application:{db:'db'},
         database:{
             name:'coins',
-            collection:{otp:'otp',subscribed:'subscribed',tweets:'tweets',goodBadTweets:'goodBadTweets'},
+            collection:{otp:'otp',subscribed:'subscribed',tweets:'tweets',goodBadTweets:'good_bad_tweets'},
             email:'email',
             from:'from',
             to:'to',
@@ -79,11 +80,13 @@ module.exports = {
             statuses:'statuses',
             coinName:'coinName',
             tweet:{
+                tweet:'tweet',
                 text:'text',
                 id:'_id',
                 index:'index',
                 timestamp:'timestamp',
                 createdAt:'created_at',
+                category:'category',
             },
         },
         mailer:{

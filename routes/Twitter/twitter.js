@@ -46,7 +46,6 @@ router.get('/ut',function(req, res, next) {
     if(symbol==undefined||symbol==null) symbol="btc"
     if(coinName==undefined||coinName==null) symbol="bitcoin"
     service.updateTweetDb(coinName,symbol)
-    
 });
 
 
@@ -62,6 +61,17 @@ router.get('/ugb', function(req, res, next) {
 // get good bad tweets
 router.get('/ggb', function(req, res, next) {
     presenter.getGoodBadTweetsDb((status,data)=>{
+        res.json({
+            status:status,
+            message: data
+        })
+    })
+});
+// get good bad few
+router.get('/ggbf', function(req, res, next) {
+    var count=parseInt(req.query[id.params.count])
+    if(count==undefined||count==null||count==''||count=='undefined'||isNaN(count)) count=20
+    presenter.getGoodBadTweetsFewDb(count,(status,data)=>{
         res.json({
             status:status,
             message: data

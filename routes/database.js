@@ -38,11 +38,10 @@ module.exports={
             var dbo = db.db(id.database.name);
             dbo.collection(collection).findOne(query,(err, result)=>{
                 if (err) throw err;
-                console.log(result)
                 if(result!=null){
-                    callback(true)
+                    callback(values.status.ok,result)
                 }else{
-                    callback(false)
+                    callback(values.status.error,result)
                 }
                 db.close();
             });
@@ -62,18 +61,6 @@ module.exports={
             });
         });
     },
-    // dont use this. use soft delete instead.
-    // remove(collection,query){
-    //     MongoClient.connect(network.database, function(err, db) {
-    //         if (err) throw err;
-    //         db.collection(collection).remove(query, function(err, obj) {
-    //           if (err) throw err;
-    //           console.log(obj.result.n + " document(s) deleted");
-    //           db.close();
-    //         });
-    //       });
-    // },
-
     dropCollection(collection){
         MongoClient.connect(network.database, (err, db)=>{
             if (err) throw err;
@@ -134,5 +121,44 @@ module.exports={
             });
         });
     },
+    getGoodBadTweets(callback){
+        MongoClient.connect(network.database,(err, db)=>{
+            if (err) throw err;
+            var dbo = db.db(id.database.name);
+            dbo.collection(id.database.collection.goodBadTweets).aggregate([
+                {$lookup:{from: id.database.collection.tweets,localField: id.twitter.tweet.id,foreignField: id.twitter.tweet.id,as: id.twitter.tweet.tweet}}
+            ]).toArray((err, result)=>{
+                if (err){
+                    callback(values.status.error,string.someWrong)
+                    throw err;
+                }
+                callback(values.status.ok,result)
+                db.close();
+            });
+        });
+    },
+    getGoodBadTweetsFew(count,callback){
+        MongoClient.connect(network.database,(err, db)=>{
+            if (err) throw err;
+            var dbo = db.db(id.database.name);
+            dbo.collection(id.database.collection.goodBadTweets).aggregate([
+                    {$lookup:{
+                        from: id.database.collection.tweets,
+                        localField: id.twitter.tweet.id,
+                        foreignField: id.twitter.tweet.id,
+                        as: id.twitter.tweet.tweet,
+                    }},
+                    {$sort:{[id.twitter.tweet.timestamp]: -1}},
+                    {$limit:count}, 
+            ]).toArray((err, result)=>{
+                if (err){
+                    callback(values.status.error,string.someWrong)
+                    throw err;
+                }
+                callback(values.status.ok,result)
+                db.close();
+            });
+        });
+    }
 
 }

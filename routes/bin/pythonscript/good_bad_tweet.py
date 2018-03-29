@@ -4,11 +4,11 @@ import pandas as pd
 import numpy as np
 import math
 from datetime import datetime
-import time
 import re
 from nltk.corpus import stopwords
 from nltk.stem.snowball import EnglishStemmer
 import pickle
+from pymongo import MongoClient
 
 
 base_path='/Users/oyo/Desktop/awesome/tweets/'
@@ -21,10 +21,12 @@ my_stop_words='to and http https com co www'
 stop_words=stop_words+my_stop_words.split()
 
 def preprocess(_df):
+    if 'text' not in _df:
+        return pd.DataFrame({'text':[]})
     _df['text']=_df['text'].apply(lambda tweet:str(tweet).lower() if str(tweet).count('#')<=3 else '')
     _df['text']=_df['text'].apply(lambda tweet:re.sub('[^ ]+\.[^ ]+','',tweet))
 #     _df['text']=_df['text'].apply(lambda tweet:re.sub('#[^ ]+','',tweet))
-    _df['text']=_df['text'].apply(lambda tweet:re.sub('[^a-zA-Z0-9.!? ]',' ',(tweet)))
+    _df['text']=_df['text'].apply(lambda tweet:re.sub('[^a-z.A-Z0-9.!? ]',' ',(tweet)))
     _df['text']=_df['text'].apply(lambda tweet:' '.join([word for word in tweet.strip().split() if word not in stop_words]))
     _df['text']=_df['text'].apply(lambda tweet:stemmer.stem(tweet.strip()))
     return _df
@@ -49,9 +51,9 @@ def sentiment(timestamp,df,opn):
     proba_good_tweet_index=[]
     proba_bad_tweet_index=[]
     for i,row in enumerate(probability):
-        if row[0]>0.5:
+        if row[0]>0.5 and np.argmax(row)==0:
             proba_good_tweet_index.append(i)
-        if row[1]>0.5: 
+        if row[1]>0.5 and np.argmax(row)==1: 
             proba_bad_tweet_index.append(i)
             
     proba_good_filtered_df=p_df.iloc[proba_good_tweet_index]
@@ -65,7 +67,7 @@ def sentiment(timestamp,df,opn):
     
     proba_good_bad_actual_df=pd.concat([proba_good_actual_df,proba_bad_actual_df],axis=0)
     proba_good_bad_actual_df=proba_good_bad_actual_df.sort_values(['timestamp'], ascending=True)
-
+    
     g = opn + proba_good_actual_df['timestamp'].value_counts().sum()
     b = opn + proba_bad_actual_df['timestamp'].value_counts().sum()
 
@@ -74,18 +76,29 @@ def sentiment(timestamp,df,opn):
     low = min(b, close, opn)
 
     opn=close
-
-    if proba_good_bad_actual_df.empty:
-        return None
-
     return [proba_good_bad_actual_df,high,low,close]
 
+# Mongodb settings
+client = MongoClient()
+client = MongoClient('localhost', 27017)
+db = client.coins
+
 # Twitter Dataset
-# tweet_dataset=pd.read_csv('dataset/csv/filter_dataset/proba_filtered_dataset.csv',encoding = 'utf8')
-tweet_dataset=pd.read_json(sys.argv[1],encoding = 'utf8')
-# tweet_dataset=pd.read_json('[{"text":"CBOE Nudges SEC to Allow Bitcoin ETFs in New Letter","timestamp":"Tue Mar 27 13:39:58 +0000 2018","index":0}]',encoding = 'utf8')
+l=list(db.good_bad_tweets.find({}))
+if len(l)>0:
+    lastId=l[-1]['_id']
+    main_df=pd.DataFrame(list(db.tweets.find({'_id': {'$gt': ObjectId(lastId)}})))
+else:
+    main_df=pd.DataFrame(list(db.tweets.find({})))
+    
+main_df=main_df.drop_duplicates(subset=['_id'], keep=False)
+
+tweet_dataset=main_df[['_id','text','created_at']].copy()
+tweet_dataset.columns = ['_id', 'text','timestamp']
+tweet_dataset['timestamp']=pd.to_datetime(tweet_dataset['timestamp'])
 tweet_dataset['timestamp'] = [time_to_milli(_time) for _time in tweet_dataset['timestamp']] 
 tweet_df = tweet_dataset.sort_values(['timestamp'], ascending=True)
+
 # Saved Model
 classifier = pickle.load(open(base_path+'saved_classifier/good_bad_classifier.sav', 'rb'))
 
@@ -110,10 +123,8 @@ for time_milli in range(current_date,last_date+step,step):
     day_tweets=preprocess(day_tweets)
     day_tweets=day_tweets[day_tweets['text']!='']
     day_tweets=day_tweets[day_tweets['timestamp']>0]
-
     
     x=sentiment(current_date,day_tweets.copy(),opn)
-
     if x!=None:
         [good_bad_df,high,low,close]=x
     else:
@@ -139,7 +150,11 @@ senti_df['low'] = senti_low
 senti_df['time'] = time_list
 senti_df.to_csv(base_path+'dataset/csv/good_bad/sentiment_trend.csv', sep=',', index=False)
 
-final_df.to_csv(base_path+'dataset/csv/good_bad/gb_filter/{}.csv'.format(round(time.time())), sep=',', index=False)
-
-print('{} tweets filtered.'.format(final_df.shape[0]))
+final_df=final_df.drop_duplicates(['_id'],keep=False)
+final_df=final_df.drop(columns=['text','timestamp'])
+if not final_df.empty:
+    db.good_bad_tweets.insert_many(final_df.to_dict(orient='records'))
+    print('{} rows filtered'.format(final_df.shape[0]))
+else:
+    print('no rows filtered')
 sys.stdout.flush()

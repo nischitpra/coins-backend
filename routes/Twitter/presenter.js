@@ -4,6 +4,7 @@ const string = require('../constants').string
 const connection = require('../connection')
 const db = require('../database')
 const pythoninvoker=require('../../routes/pythoninvoker')
+const ObjectID = require('mongodb').ObjectID
 
 
 /** twitter api */
@@ -40,6 +41,7 @@ module.exports={
         for(var i in data){
             var item={}
             item[id.twitter.tweet.id]=data[i][id.twitter.tweet.id]
+            item[id.twitter.tweet.index]=i
             item[id.twitter.tweet.text]=data[i][id.twitter.tweet.text]
             item[id.twitter.tweet.timestamp]=data[i][id.twitter.tweet.createdAt]
             list.push(item)
@@ -51,14 +53,22 @@ module.exports={
         console.log(`filtered data length: ${filteredData.length}`)
         for(var i in filteredData){
             var item=data[filteredData[i][id.twitter.tweet.index]]
+            console.log(item)
             list.push(item)
         }
         return list
     },
     getGoodBadTweetsDb(callback){
         console.log(`getting good bad tweet`)
-        db.findMany(id.database.collection.goodBadTweets,{},(status,data)=>{
-            callback(status,data)
+        db.getGoodBadTweets((status,tweets)=>{
+            console.log(tweets)
+            callback(status,tweets)
+        })
+    },
+    getGoodBadTweetsFewDb(count,callback){
+        console.log(`getting good bad tweet few`)
+        db.getGoodBadTweetsFew(count,(status,tweets)=>{
+            callback(status,tweets)
         })
     },
     streamTweets(name,symbol){
@@ -74,6 +84,7 @@ module.exports={
         pythoninvoker.getFilteredTweet(JSON.stringify(preparedList),(status,filteredData)=>{
             filteredData=this.postFilterTweetsList(tweets,filteredData)
             console.log(`${filteredData.length} tweets filtered`)
+
             if(filteredData.length>0){
                 db.insertMany(id.database.collection.tweets,filteredData,(status,message)=>console.log(message))
             }else{

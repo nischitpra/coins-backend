@@ -33,9 +33,9 @@ module.exports={
             callback(values.status.error,error.toString('utf8'))
         })
     },
-    getGoodBadTweet(tweets,callback){
+    getGoodBadTweet(callback){
         var spawn = require("child_process").spawn
-        var process = spawn(files.python.compiler,[files.buildPath(files.python.goodBadTweet),tweets] )
+        var process = spawn(files.python.compiler,[files.buildPath(files.python.goodBadTweet)] )
         console.log('get good bad tweet process spawned')
         process.stdout.on('data', (data)=>{
             console.log('returned good bad from python')
