@@ -38,6 +38,14 @@ router.get('/sentiment',function(req, res, next) {
         })
     })
 });
+router.get('/s',function(req, res, next) {
+    presenter.getSentimentTrend((status,data)=>{
+        res.json({
+            status:status,
+            message: data
+        })
+    })
+});
 
 // update tweet (after removing spams)
 router.get('/ut',function(req, res, next) {

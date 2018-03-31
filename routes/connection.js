@@ -110,7 +110,7 @@ module.exports={
                 bufferTweets.push(tweet)
                 console.log(bufferTweets.length);
                 console.log(tweet.text)
-                if(bufferTweets.length>50){
+                if(bufferTweets.length>25){
                     console.log('--------------===========-------------')
                     callback(bufferTweets)
                     bufferTweets=[]

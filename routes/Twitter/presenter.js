@@ -92,5 +92,11 @@ module.exports={
             }
         })
     },
+    getSentimentTrend(callback){
+        console.log(`getting sentiment trend`)
+        db.findManySorted(id.database.collection.sentimentTrend,{},{'time':1},(status,data)=>{
+            callback(status,data)
+        })
+    }
     
 }

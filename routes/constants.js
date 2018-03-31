@@ -52,7 +52,13 @@ module.exports = {
         application:{db:'db'},
         database:{
             name:'coins',
-            collection:{otp:'otp',subscribed:'subscribed',tweets:'tweets',goodBadTweets:'good_bad_tweets'},
+            collection:{
+                otp:'otp',
+                subscribed:'subscribed',
+                tweets:'tweets',
+                goodBadTweets:'good_bad_tweets',
+                sentimentTrend:'sentiment_trend',
+            },
             email:'email',
             from:'from',
             to:'to',
