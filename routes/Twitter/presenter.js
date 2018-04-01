@@ -17,9 +17,9 @@ var client = new Twitter({
 });
 
 module.exports={
-    getSpecificTweetsDb(name,symbol,callback){
-        console.log(`getting tweet for ${symbol}`)
-        db.findMany(id.database.collection.tweets,{[id.twitter.tweet.text] : {$regex : new RegExp( `${name}|${symbol}`, 'i')}},(status,data)=>{
+    getSpecificTweetsDb(name,from,limit,callback){
+        console.log(`getting tweet for ${name} ${from}`)
+        db.findManyLimited(id.database.collection.tweets,{[id.twitter.tweet.text] : {$regex : new RegExp( `${name}|${from}`, 'i')}},{'_id':-1},limit,(status,data)=>{
             callback(status,data)
         })
     },

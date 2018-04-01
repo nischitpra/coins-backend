@@ -5,14 +5,14 @@ const id = require('../constants').id
 const values = require('../constants').values
 const string = require('../constants').string
 const WebSocket = require('ws')
-const pythoninvoker=require('../../routes/pythoninvoker')
 const service = require('./service')
 
 // for general search tweets
 router.get('/q', function(req, res, next) {
-    const symbol=req.query[id.twitter.symbol]
+    const from=req.query[id.params.from]
+    // const to=req.query[id.params.to]
     const coinName=req.query[id.twitter.coinName]
-    presenter.getSpecificTweetsDb(coinName,symbol,(status,data)=>{
+    presenter.getSpecificTweetsDb(coinName,from,10,(status,data)=>{
         res.json({
             status:status,
             message: data
@@ -30,11 +30,12 @@ router.get('/h', function(req, res, next) {
     })
 });
 
-router.get('/sentiment',function(req, res, next) {
-    pythoninvoker.getSentimentTrend((status,data)=>{
+// for updating sentiment trend
+router.get('/ust',function(req, res, next) {
+    service.updateSentimentTrend((status,message)=>{
         res.json({
             status:status,
-            message: data
+            message: message
         })
     })
 });

@@ -12,11 +12,11 @@ module.exports={
         console.log('get sentiment trend process spawned')
         process.stdout.on('data', (data)=>{
             console.log('trend returned from python')
-            callback(values.status.ok,JSON.parse(data.toString('utf8')))
+            callback(values.status.ok,data.toString('utf8'))
         })
         process.stderr.on('data',(error)=>{
             console.log('some error occured')
-            callback(values.status.error,JSON.parse(error.toString('utf8')))
+            callback(values.status.error,error.toString('utf8'))
         })
     },
     getFilteredTweet(tweets,callback){

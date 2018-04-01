@@ -75,6 +75,20 @@ module.exports={
             });
         });
     },
+    findManyLimited(collection,query,sortQuery,_limit,callback){
+        MongoClient.connect(network.database,(err, db)=>{
+            if (err) throw err;
+            var dbo = db.db(id.database.name);
+            dbo.collection(collection).find(query).sort(sortQuery).limit(_limit).toArray((err, result)=>{
+                if (err){
+                    callback(values.status.error,string.someWrong)
+                    throw err;
+                }
+                callback(values.status.ok,result)
+                db.close();
+            });
+        });
+    },
     dropCollection(collection){
         MongoClient.connect(network.database, (err, db)=>{
             if (err) throw err;

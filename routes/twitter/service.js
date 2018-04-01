@@ -7,6 +7,11 @@ const string = require('../constants').string
 const pythoninvoker=require('../../routes/pythoninvoker')
 
 module.exports={
+    updateSentimentTrend(callback){
+        pythoninvoker.getSentimentTrend((status,data)=>{
+            callback(status,data)
+        })
+    },
     updateTweetDb(name,symbol){
         presenter.streamTweets(name,symbol)
     },
