@@ -50,6 +50,7 @@ router.get('/s',function(req, res, next) {
 
 // update tweet (after removing spams)
 router.get('/ut',function(req, res, next) {
+    // if(this.lock==undefined)
     var symbol=req.query[id.twitter.symbol]
     var coinName=req.query[id.twitter.coinName]
     if(symbol==undefined||symbol==null) symbol="btc"

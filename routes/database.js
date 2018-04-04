@@ -5,14 +5,19 @@ const string = require('./constants').string;
 var MongoClient = require('mongodb').MongoClient;
 
 module.exports={
-    insertOne(collection,value){
+    insertOne(collection,value,callback){
         MongoClient.connect(network.database,(err, db)=>{
             if (err) throw err;
             var dbo = db.db(id.database.name);
             dbo.collection(collection).insertOne(value, (err, res)=>{
-                if (err) throw err;
-                console.log("1 document inserted");
-                db.close();
+                if (err) {
+                    callback(values.status.error,string.someWrong)
+                    throw err;
+                }else{
+                    console.log(`1 document inserted`);
+                    db.close();
+                    callback(values.status.ok,string.inserted(1))
+                }
             });
         })
     },

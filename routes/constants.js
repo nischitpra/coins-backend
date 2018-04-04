@@ -17,6 +17,7 @@ module.exports = {
             sentimentTrend:`pythonscript/sentiment_trend.py`,
             filterTweet:`pythonscript/filter_tweet.py`,
             goodBadTweet:`pythonscript/good_bad_tweet.py`,
+            forecaster:`pythonscript/forecaster/model.py`,
         },
         buildPath:(pathFromBin)=>`/Users/oyo/Desktop/awesome/express/coins/routes/bin/${pathFromBin}`,
     },
@@ -48,7 +49,7 @@ module.exports = {
 
     },
     id:{
-        params:{ count:'count', from:'f',to:'t',coinName:'coinName', },
+        params:{ count:'count', from:'f',to:'t',coinName:'coinName',type:'type' },
         application:{db:'db'},
         database:{
             name:'coins',
@@ -58,12 +59,18 @@ module.exports = {
                 tweets:'tweets',
                 goodBadTweets:'good_bad_tweets',
                 sentimentTrend:'sentiment_trend',
+                history:'history',
             },
             email:'email',
             from:'from',
             to:'to',
             createdAt:'createdAt',
             isDeleted:'isDeleted',
+            cc:{
+                id:'_id',
+                history:'history',
+                history_from_to_type:(from,to,type)=>`${from}_${to}_${type}`,
+            },
         },
         news:{everything:0,headlines:1,articles:'articles'},
         cryptocompare:{

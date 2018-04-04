@@ -16,6 +16,7 @@ const connection=require('./routes/connection')
 const id=require('./routes/constants').id
 const network=require('./routes/constants').network
 const CryptoSocket=require('./routes/cryptocompare/cryptoSocket')
+const forecast=require('./routes/forecast/forecast')
 
 const database = require('./routes/database')
 
@@ -45,6 +46,7 @@ app.use('/news',cors(corsOptions), news);
 app.use('/cc',cors(corsOptions),cryptoCompare);
 app.use('/twitter',cors(corsOptions),twitter);
 app.use('/mailer',cors(corsOptions),mailer)
+app.use('/forecast',cors(corsOptions),forecast)
 
 
 
@@ -75,7 +77,7 @@ app.use(function(err, req, res, next) {
 // /* socket  to communicate with client */
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
-server.listen(3002);
+server.listen(3004);
 
 
 var cryptoSocketList={}
