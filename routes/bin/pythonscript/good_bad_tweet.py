@@ -51,36 +51,22 @@ def sentiment(timestamp,df):
     if p_df.empty: 
         return None
     probability=classifier.predict_proba(p_df['text'])
-    proba_good_tweet_index=[]
-    proba_bad_tweet_index=[]
-    proba_spam_tweet_index=[]
+    
+    proba_df=pd.DataFrame()
+    oth_spam_df=pd.DataFrame()
     for i,row in enumerate(probability):
         if row[0]>0.5 and np.argmax(row)==0:
-            proba_good_tweet_index.append(i)
+            proba_df=proba_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':0,'probability':row[0]},ignore_index=True)
         if row[1]>0.5 and np.argmax(row)==1: 
-            proba_bad_tweet_index.append(i)
+            proba_df=proba_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':1,'probability':row[1]},ignore_index=True)
         if row[2]>0.5 and np.argmax(row)==2:
-            proba_spam_tweet_index.append(i)
-            
-    proba_good_filtered_df=p_df.iloc[proba_good_tweet_index]
-    proba_bad_filtered_df=p_df.iloc[proba_bad_tweet_index]
-    proba_spam_filtered_df=p_df.iloc[proba_spam_tweet_index]
-    
-    proba_good_actual_df = df.iloc[proba_good_filtered_df.index]
-    proba_bad_actual_df = df.iloc[proba_bad_filtered_df.index]
-    proba_spam_actual_df = df.iloc[proba_spam_filtered_df.index]
+            oth_spam_df=oth_spam_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':2,'probability':row[2]},ignore_index=True)
+        if row[3]>0.5 and np.argmax(row)==3:
+            oth_spam_df=oth_spam_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':3,'probability':row[3]},ignore_index=True)
 
-    proba_good_actual_df['category']=np.zeros(proba_good_actual_df.shape[0])
-    proba_bad_actual_df['category']=np.ones(proba_bad_actual_df.shape[0])
-    
-    proba_good_bad_actual_df=pd.concat([proba_good_actual_df,proba_bad_actual_df],axis=0)
-    proba_good_bad_actual_df=proba_good_bad_actual_df.sort_values(['timestamp'], ascending=True)
-    
-    proba_good_actual_df.to_csv(base_path+'dataset/csv/good_bad/filtered/{}_good.csv'.format(timestamp), sep=',', index=False)
-    proba_bad_actual_df.to_csv(base_path+'dataset/csv/good_bad/filtered/{}_bad.csv'.format(timestamp), sep=',', index=False)
-    proba_spam_actual_df.to_csv(base_path+'dataset/csv/good_bad/filtered/{}_spam.csv'.format(timestamp), sep=',', index=False)
-    
-    return [proba_good_bad_actual_df]
+    proba_df.to_csv(base_path+'dataset/csv/good_bad/filtered/{}_good_bad.csv'.format(timestamp), sep=',', index=False)
+    oth_spam_df.to_csv(base_path+'dataset/csv/good_bad/filtered/{}_oth_spam_news.csv'.format(timestamp), sep=',', index=False)
+    return [proba_df,oth_spam_df]
 
 # Mongodb settings
 client = MongoClient()
@@ -117,23 +103,27 @@ last_date=tweet_df['timestamp'].iloc[-1]
 step=HISTORY_TYPE
 
 
-final_df=pd.DataFrame()
+final_proba_df=pd.DataFrame()
+final_oth_spam_df=pd.DataFrame()
 
 for time_milli in range(current_date,last_date+step,step):
-    day_tweets=slice_tweets(tweet_df,current_date)
-    x=sentiment(current_date,day_tweets.copy())
+    day_tweets=slice_tweets(tweet_df,time_milli)
+    x=sentiment(time_milli,day_tweets.copy())
     if x!=None:
-        [good_bad_df]=x
-        final_df=pd.concat([final_df,good_bad_df])
-    else:
-        current_date=to_time(current_date,1)
-        continue
+        [proba_df,oth_spam_df]=x
+        final_proba_df=pd.concat([final_proba_df,proba_df])
+        final_oth_spam_df=pd.concat([final_oth_spam_df,oth_spam_df])
         
-final_df=final_df.drop_duplicates(['_id'],keep='first')
-final_df=final_df.drop(columns=['text'])
-if not final_df.empty:
-    db.good_bad_tweets.insert_many(final_df.to_dict(orient='records'))
-    print('{} rows filtered'.format(final_df.shape[0]))
+final_oth_spam_df=final_oth_spam_df.drop_duplicates(['_id'],keep='first')
+final_proba_df=final_proba_df.drop_duplicates(['_id'],keep='first')
+
+if not final_oth_spam_df.empty:
+    db.other_spam_tweets.insert_many(final_oth_spam_df.to_dict(orient='records'))
+
+if not final_proba_df.empty:
+    db.good_bad_tweets.insert_many(final_proba_df.to_dict(orient='records'))
+    print('{} rows filtered'.format(final_proba_df.shape[0]))
 else:
     print('no rows filtered')
+
 sys.stdout.flush()

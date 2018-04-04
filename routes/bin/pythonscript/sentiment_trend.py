@@ -40,10 +40,13 @@ if m_df.empty:
 df=pd.DataFrame()
 df['category']=m_df['category'].copy()
 df['timestamp']=m_df['timestamp']
+df['probability']=m_df['probability']
 df['_id']=m_df['_id']
 
 # Main
 endTime=df['timestamp'].iloc[0]+window_size
+
+senti_df=pd.DataFrame()
 open_list=[]
 close_list=[]
 high_list=[]
@@ -63,29 +66,16 @@ else:
 checkpoint_id=0.0
 for i in range(df.shape[0]):
     if df['timestamp'].iloc[i]>=endTime:
-        checkpoint_id=df['_id'].iloc[i]
-        id_list.append(checkpoint_id)
-        open_list.append(opn)
-        close_list.append(close)
-        high_list.append(high)
-        low_list.append(low)
-        time_list.append(endTime)
+        senti_df=senti_df.append({'_id':df['_id'].iloc[i],'time':endTime,'open':opn,'high':high,'low':low,'close':close},ignore_index=True)
         endTime+=window_size
         opn=close
         close=opn
         high=opn
         low=opn
-    close+=1.0 if df['category'].iloc[i]==0 else -1.0
+    close+=df['probability'].iloc[i] if df['category'].iloc[i]==0 else -df['probability'].iloc[i]
     low=close if close<low else low
     high=close if close>high else high
 
-senti_df=pd.DataFrame()    
-senti_df['open']=open_list
-senti_df['high']=high_list
-senti_df['low']=low_list
-senti_df['close']=close_list
-senti_df['time']=time_list
-senti_df['_id']=id_list
 
 if not senti_df.empty:
     db.sentiment_trend.insert_many(senti_df.to_dict(orient='records'))
