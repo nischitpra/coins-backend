@@ -55,13 +55,13 @@ def sentiment(timestamp,df):
     proba_df=pd.DataFrame()
     oth_spam_df=pd.DataFrame()
     for i,row in enumerate(probability):
-        if row[0]>0.5 and np.argmax(row)==0:
+        if np.argmax(row)==0:
             proba_df=proba_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':0,'probability':row[0]},ignore_index=True)
-        if row[1]>0.5 and np.argmax(row)==1: 
+        elif np.argmax(row)==1: 
             proba_df=proba_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':1,'probability':row[1]},ignore_index=True)
-        if row[2]>0.5 and np.argmax(row)==2:
+        elif np.argmax(row)==2:
             oth_spam_df=oth_spam_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':2,'probability':row[2]},ignore_index=True)
-        if row[3]>0.5 and np.argmax(row)==3:
+        else:
             oth_spam_df=oth_spam_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':3,'probability':row[3]},ignore_index=True)
 
     proba_df.to_csv(base_path+'dataset/csv/good_bad/filtered/{}_good_bad.csv'.format(timestamp), sep=',', index=False)
@@ -74,15 +74,18 @@ client = MongoClient('localhost', 27017)
 db = client.coins
 
 # Twitter Dataset
-l=list(db.good_bad_tweets.find().sort('_id',1))
-if len(l)>0:
-    lastId=l[-1]['_id']
-    main_df=pd.DataFrame(list(db.tweets.find({'_id': {'$gt': ObjectId(lastId)}}).sort('_id',1)))
+gb_l=list(db.good_bad_tweets.find().sort('_id',1))
+smp_l=list(db.other_spam_tweets.find().sort('_id',1))
+
+record_exists=len(gb_l)>0 or len(smp_l)>0
+
+if record_exists:
+    last_id=gb_l[-1]['_id'] if gb_l[-1]['_id']>smp_l[-1]['_id'] else smp_l[-1]['_id']
+    main_df=pd.DataFrame(list(db.tweets.find({'_id': {'$gt': ObjectId(last_id)}}).sort('_id',1)))
 else:
     main_df=pd.DataFrame(list(db.tweets.find().sort('_id',1)))
     
 if main_df.empty:
-    print('no values to process')
     sys.exit()
     
 main_df=main_df.drop_duplicates(subset=['_id'], keep='first')
@@ -113,13 +116,14 @@ for time_milli in range(current_date,last_date+step,step):
         [proba_df,oth_spam_df]=x
         final_proba_df=pd.concat([final_proba_df,proba_df])
         final_oth_spam_df=pd.concat([final_oth_spam_df,oth_spam_df])
-        
-final_oth_spam_df=final_oth_spam_df.drop_duplicates(['_id'],keep='first')
-final_proba_df=final_proba_df.drop_duplicates(['_id'],keep='first')
+
+if not final_oth_spam_df.empty:
+    final_oth_spam_df=final_oth_spam_df.drop_duplicates(['_id'],keep='first')
+if not final_proba_df.empty:
+    final_proba_df=final_proba_df.drop_duplicates(['_id'],keep='first')
 
 if not final_oth_spam_df.empty:
     db.other_spam_tweets.insert_many(final_oth_spam_df.to_dict(orient='records'))
-
 if not final_proba_df.empty:
     db.good_bad_tweets.insert_many(final_proba_df.to_dict(orient='records'))
     print('{} rows filtered'.format(final_proba_df.shape[0]))

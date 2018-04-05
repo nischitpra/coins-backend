@@ -7,6 +7,8 @@ const string = require('../constants').string
 const WebSocket = require('ws')
 const service = require('./service')
 
+var locked=false
+
 // for general search tweets
 router.get('/q', function(req, res, next) {
     const from=req.query[id.params.from]
@@ -50,12 +52,31 @@ router.get('/s',function(req, res, next) {
 
 // update tweet (after removing spams)
 router.get('/ut',function(req, res, next) {
-    // if(this.lock==undefined)
-    var symbol=req.query[id.twitter.symbol]
-    var coinName=req.query[id.twitter.coinName]
-    if(symbol==undefined||symbol==null) symbol="btc"
-    if(coinName==undefined||coinName==null) symbol="bitcoin"
-    service.updateTweetDb(coinName,symbol)
+    if(locked==false){
+        locked=true
+        var symbol=req.query[id.twitter.symbol]
+        var coinName=req.query[id.twitter.coinName]
+        if(symbol==undefined||symbol==null) symbol="btc"
+        if(coinName==undefined||coinName==null) symbol="bitcoin"
+        service.updateTweetDb(coinName,symbol)
+
+        setInterval(()=>{
+            service.updateGoodBadTweets((status,message)=>{
+                console.log('\n\n\n\x1b[41m\x1b[36m%s\x1b[0m',`good bad service: ${status} ${message}`)
+                service.updateSentimentTrend((status,message)=>{
+                    console.log('\n\n\n\x1b[41m\x1b[36m%s\x1b[0m',`sentiment trend service: ${status} ${message}`)
+                })
+            })
+        },60*60*1000)// 1 hr
+
+
+    }else if(locked){
+        res.json({
+            status:values.status.error,
+            message: string.functionLocked
+        })
+    }
+    
 });
 
 

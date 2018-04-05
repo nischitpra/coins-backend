@@ -21,7 +21,7 @@ if len(last_insert)>0:
                                              'as': "tweet"
                                          }},
                                          {'$sort':{'timestamp':1}}
-                                        ])
+                                        ],allowDiskUse=True)
 else:
     cursor=db.good_bad_tweets.aggregate([
                                          {'$lookup':{

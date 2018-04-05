@@ -139,6 +139,7 @@ module.exports = {
             updated:(count)=>`${count} tweets downloaded`,
         },
         inserted:(count)=>`${count} items added!`,
+        functionLocked:`Function Locked! An instance of the function is already running.`,
     },
 }
 
