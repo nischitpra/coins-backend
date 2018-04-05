@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const presenter = require('./presenter')
+const service = require('./service')
 const id = require('../constants').id
 const values = require('../constants').values
 const string = require('../constants').string
@@ -21,6 +22,18 @@ router.get('/history', function(req, res, next) {
             status:status,
             [id.cryptocompare.historyType]:historyType,
             message: data
+        })
+    )
+});
+
+router.get('/uh',function(req, res, next) {
+    const from=req.query[id.cryptocompare.from]
+    const to=req.query[id.cryptocompare.to]
+    const exchange=req.query[id.cryptocompare.exchange]
+    const historyType=parseInt(req.query[id.cryptocompare.historyType])
+    service.updateHistory(historyType,from,to,exchange,(status,message)=>res.json({
+            status:status,
+            message: message
         })
     )
 });

@@ -11,6 +11,17 @@ module.exports = {
         subscribeOtp:(email,from,to,otp)=>`http://localhost:3001/mailer/subscribe/validate?email=${email}&from=${from}&to=${to}&otp=${otp}`,
         database:`mongodb://localhost:27017/`,
     },
+    files:{
+        python:{
+            compiler:'/usr/local/Cellar/python/3.6.4_2/bin/python3.6',
+            sentimentTrend:`pythonscript/sentiment_trend.py`,
+            filterTweet:`pythonscript/filter_tweet.py`,
+            goodBadTweet:`pythonscript/good_bad_tweet.py`,
+            forecaster:`pythonscript/forecaster/model.py`,
+        },
+        buildPath:(pathFromBin)=>`/Users/oyo/Desktop/awesome/express/coins/routes/bin/${pathFromBin}`,
+    },
+
     values:{
         baseHeader:{
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
@@ -31,18 +42,35 @@ module.exports = {
         status:{
             ok:'ok',
             error:'error',
+        },
+        mailer:{
+            server:{name:'Gmail',email:'nischitpra@gmail.com',password:'Applebob123'},
         }
+
     },
     id:{
+        params:{ count:'count', from:'f',to:'t',coinName:'coinName',type:'type' },
         application:{db:'db'},
         database:{
             name:'coins',
-            collection:{otp:'otp',subscribed:'subscribed'},
+            collection:{
+                otp:'otp',
+                subscribed:'subscribed',
+                tweets:'tweets',
+                goodBadTweets:'good_bad_tweets',
+                sentimentTrend:'sentiment_trend',
+                history:'history',
+            },
             email:'email',
             from:'from',
             to:'to',
             createdAt:'createdAt',
             isDeleted:'isDeleted',
+            cc:{
+                id:'_id',
+                history:'history',
+                history_from_to_type:(from,to,type)=>`${from}_${to}_${type}`,
+            },
         },
         news:{everything:0,headlines:1,articles:'articles'},
         cryptocompare:{
@@ -64,6 +92,15 @@ module.exports = {
             symbol:'symbol',
             statuses:'statuses',
             coinName:'coinName',
+            tweet:{
+                tweet:'tweet',
+                text:'text',
+                id:'_id',
+                index:'index',
+                timestamp:'timestamp',
+                createdAt:'created_at',
+                category:'category',
+            },
         },
         mailer:{
             email:'email',
@@ -82,16 +119,27 @@ module.exports = {
     string:{
         subscribe:{
             optSent:(email)=>`Otp has been sent to ${email}`,
-            otpEmail:(otp,url)=>`Please click on the following link to subscribe \n${url}`,
+            otpEmail:(otp,url)=>`Your OTP is ${otp}. You can enter the otp or simply click on the following link to subscribe \n\n\n${url}`,
             subscribedMessage:(from,to)=>`You have just subscribed to email alerts for ${from}:${to} trend changes`,
             subscribed:(from,to)=>`You have been subscribed`,
             requestSubscriptionBody:(otp)=>`Your OTP for subscription is: ${otp}`,
             unsubscribed:`You have been unsubscribed`,
             unsubscribedMessage:(from,to)=>`You have unsubscribed email alerts for ${from}:${to}`,
             requestSubscription:`Verification for subscription`,
+            
+        },
+        database:{
+            insert:{
+                emptyList:`Trying to insert empty list.`
+            }
         },
         invalidRequest:'Invalid Request',
         someWrong:'Woops, something went wrong!',
+        tweets:{
+            updated:(count)=>`${count} tweets downloaded`,
+        },
+        inserted:(count)=>`${count} items added!`,
+        functionLocked:`Function Locked! An instance of the function is already running.`,
     },
 }
 
