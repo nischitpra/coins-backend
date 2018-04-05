@@ -27,10 +27,10 @@ router.get('/history', function(req, res, next) {
 });
 
 router.get('/uh',function(req, res, next) {
-    const from=req.query[id.cryptocompare.from]
-    const to=req.query[id.cryptocompare.to]
-    const exchange=req.query[id.cryptocompare.exchange]
-    const historyType=parseInt(req.query[id.cryptocompare.historyType])
+    const from=req.query[id.params.from]
+    const to=req.query[id.params.to]
+    const exchange=req.query[id.params.exchange]
+    const historyType=parseInt(req.query[id.params.type])
     service.updateHistory(historyType,from,to,exchange,(status,message)=>res.json({
             status:status,
             message: message

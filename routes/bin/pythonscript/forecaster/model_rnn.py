@@ -6,6 +6,8 @@ import time
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+base_path_nhuche="/Users/oyo/Desktop/awesome/express/coins/routes/bin/pythonscript/"
+base_path_pandu="C:\\Users\\SHYAM\\OneDrive\\UBUNTU LATEST BACKUP\\"
 
 class LstmRNN(object):
     def __init__(self, sess, crypto_count,
@@ -112,8 +114,8 @@ class LstmRNN(object):
         for label_, d_ in enumerate(dataset_list):
             merged_test_X += list(d_.test_X)
             merged_test_y += list(d_.test_y)
-            dates += list(d_.dates)
             merged_test_labels += [[label_]] * len(d_.test_X)
+            dates += list(d_.dates)
 
         merged_test_X = np.array(merged_test_X)
         merged_test_y = np.array(merged_test_y)
@@ -163,12 +165,9 @@ class LstmRNN(object):
                     }
                     train_loss, _, train_merged_sum = self.sess.run(
                         [self.loss, self.optim, self.merged_sum], train_data_feed)
-
-                    #if np.mod(global_step, len(dataset_list) * 200 / config.input_size) == 1:
                     test_loss, test_pred = self.sess.run([self.loss_test, self.pred], test_data_feed)
-
-                        #plt.savefig("/home/maverick/PycharmProjects/CryptoCompare/BTC Plots/" + str(epoch) + "-ETH.png", format='png', bbox_inches='tight', transparent=True)
-
+                    # print("Step:%d [Epoch:%d] [Learning rate: %.6f] train_loss:%.6f test_loss:%.6f", global_step, epoch,
+                        #   learning_rate, train_loss, test_loss)
         fig = plt.figure(figsize=(100, 50), facecolor='white')
         plt.subplot(2, 2, 1)
         plt.plot(dates, merged_test_y, 'blue')
@@ -179,11 +178,12 @@ class LstmRNN(object):
         plt.plot(dates, test_pred, 'red')
         plt.xlabel("day")
         plt.ylabel("normalized price")
-        plt.savefig("/saved_model/trial.png", format='png', bbox_inches='tight')
+        plt.savefig(base_path_nhuche+"image_model_trial.png", format='png', bbox_inches='tight')
         #plt.show()
 
-        final_pred, final_loss = self.sess.run([self.pred, self.loss], test_data_feed)
 
+        final_pred, final_loss = self.sess.run([self.pred, self.loss], test_data_feed)
+        
         # Save the final model
         self.save(global_step,to)
         return final_pred
@@ -216,18 +216,18 @@ class LstmRNN(object):
         model_name = self.model_name + ".model"
         self.saver.save(
             self.sess,
-            os.path.join("/saved_model", model_name),
+            os.path.join(base_path_nhuche+"forecaster/saved_model", model_name),
             global_step=step
         )
 
-    def load(self,df):
-        ckpt = tf.train.get_checkpoint_state("/saved_model")
+    def load(self,predict_X):
+        ckpt = tf.train.get_checkpoint_state(base_path_nhuche+"forecaster/saved_model")
+        # print ('checkpoint: ',ckpt)        
         if ckpt and ckpt.model_checkpoint_path:
             ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
-            self.saver.restore(self.sess, os.path.join("/saved_model", ckpt_name))
+            self.saver.restore(self.sess, os.path.join(base_path_nhuche+"forecaster/saved_model", ckpt_name))
             counter = int(next(re.finditer("(\d+)(?!.*\d)", ckpt_name)).group(0))
-            prdeict_X = df.values.tolist()
-            predict_X = np.array(predict_X)
+            predict_X = predict_X.reshape(predict_X.shape[0],1,predict_X.shape[1])
             pred_feed_dict = {
                 self.learning_rate: 0.0,
                 self.keep_prob: 1.0,
@@ -235,7 +235,6 @@ class LstmRNN(object):
             }
             results = self.sess.run(self.pred, pred_feed_dict)
             return True, counter, results
-
         else:
             return False, 0,[[],[],[],[]]
 

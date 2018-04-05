@@ -49,7 +49,7 @@ module.exports = {
 
     },
     id:{
-        params:{ count:'count', from:'f',to:'t',coinName:'coinName',type:'type' },
+        params:{ count:'count', from:'f',to:'t',coinName:'coinName',type:'type',exchange:'e' },
         application:{db:'db'},
         database:{
             name:'coins',
@@ -60,6 +60,7 @@ module.exports = {
                 goodBadTweets:'good_bad_tweets',
                 sentimentTrend:'sentiment_trend',
                 history:'history',
+                forecast:'forecast',
             },
             email:'email',
             from:'from',
