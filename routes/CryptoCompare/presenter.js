@@ -2,6 +2,7 @@ const id = require('../constants').id
 const string = require('../constants').string
 const values = require('../constants').values
 const connection = require('../connection')
+const db = require('../database')
 
 
 module.exports={
@@ -32,6 +33,19 @@ module.exports={
     getSubsList(from,to,callback){
         connection.getSocketScubscriptionList(from,to,callback)
     },
+
+    getHistoryStartTime(key,callback){
+        db.findManyLimited(key,{},{[id.database.cc.time]:1},1,(status,data)=>{
+            data=data[0]
+            if(status==values.status.ok && data!=undefined){
+                console.log('previous records exists: '+data[id.database.cc.time])
+                callback(status,data[id.database.cc.time])
+            }else{
+                console.log('fresh start')
+                callback(status,Math.round(new Date().getTime()/1000))
+            }
+        })
+    }
 
    
 }

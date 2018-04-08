@@ -22,17 +22,9 @@ if len(last_insert)>0:
                                          }},
                                          {'$sort':{'timestamp':1}}
                                         ],allowDiskUse=True)
+    m_df=pd.DataFrame(list(cursor))
 else:
-    cursor=db.good_bad_tweets.aggregate([
-                                         {'$lookup':{
-                                             'from': "tweets",
-                                             'localField': "_id",
-                                             'foreignField': "_id",
-                                             'as': "tweet"
-                                         }},
-                                         {'$sort':{'timestamp':1}}
-                                        ],allowDiskUse=True)
-m_df=pd.DataFrame(list(cursor))
+    m_df=pd.DataFrame(list(db.good_bad_tweets.find()))
 
 if m_df.empty:
     print("no good bad tweets found")
@@ -54,10 +46,10 @@ low_list=[]
 time_list=[]
 id_list=[]
 if len(last_insert)==0:
-    opn=0.0
-    close=0.0
-    high=0.0
-    low=0.0
+    opn=1000.0
+    close=opn
+    high=opn
+    low=opn
 else:
     opn=last_insert[0]['close']
     close=opn
@@ -72,7 +64,13 @@ for i in range(df.shape[0]):
         close=opn
         high=opn
         low=opn
-    close+=df['probability'].iloc[i] if df['category'].iloc[i]==0 else -df['probability'].iloc[i]
+    if df['category'].iloc[i]==0:
+        close+=df['probability'].iloc[i]
+    elif df['category'].iloc[i]==1.0:
+        close-=df['probability'].iloc[i]
+    elif df['category'].iloc[i]==4.0:
+        close+=df['probability'].iloc[i]
+#     close+=df['probability'].iloc[i] if df['category'].iloc[i]==0 else -df['probability'].iloc[i]
     low=close if close<low else low
     high=close if close>high else high
 

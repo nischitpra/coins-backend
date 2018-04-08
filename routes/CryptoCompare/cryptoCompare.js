@@ -30,12 +30,15 @@ router.get('/uh',function(req, res, next) {
     const from=req.query[id.params.from]
     const to=req.query[id.params.to]
     const exchange=req.query[id.params.exchange]
-    const historyType=parseInt(req.query[id.params.type])
-    service.updateHistory(historyType,from,to,exchange,(status,message)=>res.json({
+    const type=parseInt(req.query[id.params.type])
+    var toTime=req.query[id.params.toTime]
+
+    presenter.getHistoryStartTime(id.database.cc.history_from_to_type(from,to,type),(status,toTime)=>{
+        service.insertHistory(type,from,to,exchange,toTime,(status,message)=>res.json({
             status:status,
             message: message
-        })
-    )
+        }))
+    })
 });
 
 

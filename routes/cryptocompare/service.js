@@ -7,23 +7,24 @@ const string = require('../constants').string
 const pythoninvoker=require('../../routes/pythoninvoker')
 
 module.exports={
-    updateHistory(type,from,to,exchange,callback){
-        const toTime=Math.round(new Date().getTime()/1000)
+    insertHistory(type,from,to,exchange,toTime,callback){
         presenter.getHistory(type,from,to,exchange,null,toTime,(status,data)=>{
                 if(status==values.status.ok){
-                    data={[id.database.cc.id]:id.database.cc.history_from_to_type(from,to,type),[id.database.cc.history]:data}
-                    
-                    
-                    
-                    // this is a hack that should be removed
-                    db.dropCollection(id.database.collection.history)
-                    
-                    
-                    
-                    
-                    db.insertOne(id.database.collection.history,data,(status,message)=>{
+                    var notMore=data[data.length-1][id.cryptocompare.close]==0 &&  data[data.length-1][id.cryptocompare.open]==0 &&  data[data.length-1][id.cryptocompare.high]==0 &&  data[data.length-1][id.cryptocompare.low]==0
+                    if(notMore){
+                        callback(values.status.error,'no more data in cc')
+                        return
+                    } 
+                    db.insertMany(id.database.cc.history_from_to_type(from,to,type),data,(status,message)=>{
                         console.log(message)
-                        callback(status,message)
+                        notMore=data[data.length-1][id.cryptocompare.close]==0 &&  data[data.length-1][id.cryptocompare.open]==0 &&  data[data.length-1][id.cryptocompare.high]==0 &&  data[data.length-1][id.cryptocompare.low]==0
+                        
+                        
+                        if(notMore){
+                            callback(status,`${message} start time: ${data[0][id.database.cc.time]} no more data exists!!`)
+                        }else{
+                            callback(status,message+' start time: '+data[0][id.database.cc.time] )
+                        }
                     })
                 }else{
                     callback(status,data)

@@ -49,7 +49,7 @@ module.exports = {
 
     },
     id:{
-        params:{ count:'count', from:'f',to:'t',coinName:'coinName',type:'type',exchange:'e' },
+        params:{ count:'count', from:'f',to:'t',coinName:'coinName',type:'type',exchange:'e',toTime:'tt' },
         application:{db:'db'},
         database:{
             name:'coins',
@@ -70,6 +70,7 @@ module.exports = {
             cc:{
                 id:'_id',
                 history:'history',
+                time:'time',
                 history_from_to_type:(from,to,type)=>`${from}_${to}_${type}`,
             },
         },
@@ -88,6 +89,10 @@ module.exports = {
             trades:'TRADES',
             clientEvent:'clientEvent',
             serverEvent:'serverEvent',
+            close:'close',
+            high:'high',
+            low:'low',
+            open:'open',
         },
         twitter:{
             symbol:'symbol',

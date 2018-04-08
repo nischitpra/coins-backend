@@ -5,6 +5,25 @@ const string = require('./constants').string;
 var MongoClient = require('mongodb').MongoClient;
 
 module.exports={
+    updateHistory(key,hist,callback){
+        MongoClient.connect(network.database,(err, db)=>{
+            if (err) throw err;
+            var dbo = db.db(id.database.name);
+            dbo.collection(id.database.collection.history).update(
+                {[id.database.cc.id]:key},
+                {$push:{history: { $each: hist }}},
+            (err,res)=>{
+                if (err) {
+                    callback(values.status.error,string.someWrong)
+                    throw err;
+                }else{
+                    console.log(`${key} ${hist.length} rows pushed`);
+                    db.close();
+                    callback(values.status.ok,string.inserted(1))
+                }
+            });
+        })
+    },
     insertOne(collection,value,callback){
         MongoClient.connect(network.database,(err, db)=>{
             if (err) throw err;
@@ -192,6 +211,30 @@ module.exports={
                 db.close();
             });
         });
-    }
+    },
 
+    getHistoryStartTime(key,callback){
+        MongoClient.connect(network.database,(err, db)=>{
+            if (err) throw err;
+            var dbo = db.db(id.database.name);
+            dbo.collection(id.database.collection.history).aggregate([
+                {$match:{[id.database.cc.id]:key}},
+                {$unwind:`$${id.database.cc.history}`},
+                {$sort:{[`${id.database.cc.history}.${id.database.cc.time}`]:1}},
+                {$limit:1}
+            ]).toArray((err, result)=>{
+                if (err){
+                    callback(values.status.error,string.someWrong)
+                    throw err;
+                }
+                const his=result[id.database.cc.history]
+                if(his==undefined){
+                    callback(values.status.error,-1)
+                }else{
+                    callback(values.status.ok,his[id.database.cc.time])
+                }
+                db.close();
+            });
+        });
+    },
 }
