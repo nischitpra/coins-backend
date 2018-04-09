@@ -45,6 +45,28 @@ module.exports={
                 callback(status,Math.round(new Date().getTime()/1000))
             }
         })
+    },
+
+    saveDataset(trendDataset,pairHistoryType,datasetType,callback){
+        for(var i in trendDataset){
+            var startTime=new Date(trendDataset[i][id.cryptocompare.params.start][0]).getTime()/1000
+            var endTime=new Date(trendDataset[i][id.cryptocompare.params.end][0]).getTime()/1000
+            if(startTime>endTime){
+                const t=endTime
+                endTime=startTime
+                startTime=t
+            }
+            db.findManySorted(pairHistoryType,{'time':{'$gte':startTime,'$lte':endTime}},{'time':1},(status,data)=>{
+                db.insertOne(`${pairHistoryType}_${datasetType}`,{
+                    [id.cryptocompare.trendData]:data,
+                    [id.cryptocompare.params.start]:startTime,
+                    [id.cryptocompare.params.end]:endTime,
+                },(status,message)=>{
+                    console.log(`${data.length} rows added! status:${status} message:${message}`)
+                })
+            })
+        }
+        callback('ok',`${trendDataset.length} trend lines saved`)
     }
 
    

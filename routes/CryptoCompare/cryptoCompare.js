@@ -82,6 +82,19 @@ router.get('/subs', function(req, res, next) {
     )
 });
 
+/* POST trend dataset. */
+router.post('/exportDataset', function(req, res, next) {
+    const trendDataset=req.body[id.cryptocompare.trendData]
+    const pairHistoryType=req.body[id.cryptocompare.pairHistoryType]
+    const datasetType=req.body[id.cryptocompare.datasetType]
+    
+    presenter.saveDataset(trendDataset,pairHistoryType,datasetType,
+        (status,data)=>res.json({
+            status:status,
+            message: data
+        })
+    )
+});
 
   
 

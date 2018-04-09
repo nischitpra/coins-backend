@@ -72,6 +72,7 @@ module.exports = {
                 history:'history',
                 time:'time',
                 history_from_to_type:(from,to,type)=>`${from}_${to}_${type}`,
+            
             },
         },
         news:{everything:0,headlines:1,articles:'articles'},
@@ -93,6 +94,13 @@ module.exports = {
             high:'high',
             low:'low',
             open:'open',
+            trendData:'trendData',
+            pairHistoryType:'pairHistoryType',
+            datasetType:'datasetType',
+            params:{
+                start:'start',
+                end:'end',
+            },
         },
         twitter:{
             symbol:'symbol',

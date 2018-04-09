@@ -35,18 +35,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 /** setting up cors options */
 var cors = require('cors')
-var corsOptions = {
-  origin: 'http://localhost:3000',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204 
-}
 
+app.use(cors())
 
-app.use('/',cors(corsOptions), index);
-app.use('/news',cors(corsOptions), news);
-app.use('/cc',cors(corsOptions),cryptoCompare);
-app.use('/twitter',cors(corsOptions),twitter);
-app.use('/mailer',cors(corsOptions),mailer)
-app.use('/forecast',cors(corsOptions),forecast)
+app.use('/', index);
+app.use('/news', news);
+app.use('/cc',cryptoCompare);
+app.use('/twitter',twitter);
+app.use('/mailer',mailer)
+app.use('/forecast',forecast)
 
 
 
