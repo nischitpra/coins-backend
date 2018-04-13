@@ -7,6 +7,8 @@ const values = require('../constants').values
 const string = require('../constants').string
 const WebSocket = require('ws')
 
+var lock=false;
+
 
 /* GET home page. */
 router.get('/history', function(req, res, next) {
@@ -21,6 +23,24 @@ router.get('/history', function(req, res, next) {
         (status,data)=>res.json({
             status:status,
             [id.cryptocompare.historyType]:historyType,
+            message: data
+        })
+    )
+});
+
+/** search for saved coin pair */
+router.get('/q', function(req, res, next) {
+    var from=req.query[id.params.from]
+    var to=req.query[id.params.to]
+    var exchange=req.query[id.params.exchange]
+    var historyType=parseInt(req.query[id.params.type])
+
+    from=(from==null||from==undefined)?'BTC':from
+    to=(to==null||to==undefined)?'USD':to
+    historyType=isNaN(historyType)?1:historyType
+
+    presenter.getFullPriceHistory(historyType,from,to,(status,data)=>res.json({
+            status:status,
             message: data
         })
     )
@@ -82,14 +102,63 @@ router.get('/subs', function(req, res, next) {
     )
 });
 
-/* POST trend dataset. */
-router.post('/exportDataset', function(req, res, next) {
-    const trendDataset=req.body[id.cryptocompare.trendData]
-    const pairHistoryType=req.body[id.cryptocompare.pairHistoryType]
-    const datasetType=req.body[id.cryptocompare.datasetType]
-    
-    presenter.saveDataset(trendDataset,pairHistoryType,datasetType,
-        (status,data)=>res.json({
+/** candle stick data from binance */
+router.get('/ucs', function(req, res, next) {
+    var from=req.query[id.params.from]
+    var to=req.query[id.params.to]
+    var interval=req.query[id.params.type]
+    var fromTime=req.query[id.params.fromTime]
+    var toTime=req.query[id.params.toTime]
+    var isNew=req.query[id.params.isNew]
+
+    from=(from==undefined||from==null)?'XRP':from
+    to=(to==undefined||to==null)?'BTC':to
+    interval=(interval==undefined||interval==null)?'1h':interval
+    isNew=(isNew==undefined||isNew==null)?true:isNew
+    isNew=(isNew.toLowerCase()=='true')
+
+    presenter.updateCandleStick(from,to,interval,isNew,(status,data)=>res.json({
+            status:status,
+            message: data,
+        })
+    )
+});
+/** get candle stick data from db */
+router.get('/gcs', function(req, res, next) {
+    var from=req.query[id.params.from]
+    var to=req.query[id.params.to]
+    var interval=req.query[id.params.type]
+    var fromTime=req.query[id.params.fromTime]
+    var toTime=req.query[id.params.toTime]
+    var isNew=req.query[id.params.isNew]
+
+    from=(from==undefined||from==null)?'XRP':from
+    to=(to==undefined||to==null)?'BTC':to
+    interval=(interval==undefined||interval==null)?'1h':interval
+    fromTime=(fromTime==undefined||fromTime==null)?new Date().getTime()-1000*60*60*500:fromTime
+    toTime=(toTime==undefined||toTime==null)?new Date().getTime():toTime
+    isNew=(isNew==undefined||isNew==null)?true:isNew
+    isNew=isNew=='true'
+
+
+    presenter.getCandleStick(from,to,interval,parseInt(fromTime),parseInt(toTime),isNew,(status,data)=>res.json({
+            status:status,
+            type:interval,
+            message: data,
+        }),
+        lock,(islocked)=>{console.log('lock callback');lock=islocked}
+    )
+});
+
+/** ticker 24 hours for all pair supported in binance api */
+router.get('/t', function(req, res, next) {
+    var from=req.query[id.params.from]
+    var to=req.query[id.params.to]
+
+    from=(from==undefined||from==null)?'XRP':from
+    to=(to==undefined||to==null)?'BTC':to
+
+    service.get24HrTicker(from,to,(status,data)=>res.json({
             status:status,
             message: data
         })

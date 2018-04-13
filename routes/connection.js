@@ -19,7 +19,7 @@ module.exports={
             if(response.ok){
                 response.json().then(json=>{
                     console.log('sending data back')
-                    callback(values.status.on,json[id.news.articles])
+                    callback(values.status.ok,json[id.news.articles])
                 })
             }
         }).catch((error)=>{
@@ -120,5 +120,47 @@ module.exports={
                 console.log(error);
             });
         });
+    },
+    get24HrTicker(from,to,callback){
+        console.log('fetching 24hrs ticker price')
+        fetch(network.binance.ticker24h(from,to),{
+            method: 'GET',
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
+                "Accept": 'application/json',
+            },
+        }).then(response=>{
+            console.log('ticker fetched')
+            if(response.ok){
+                response.json().then(json=>{
+                    callback(values.status.ok,json)
+                })
+            }
+        }).catch((error)=>{
+            callback(values.status.error,[])
+            console.log(error)
+        })
+    },
+    getCandleStick(from,to,interval,fromTime,toTime,callback){
+        console.log(`${network.binance.candleStick(from,to,interval,fromTime,toTime)}`)
+        fetch(network.binance.candleStick(from,to,interval,fromTime,toTime),{
+            method: 'GET',
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
+                "Accept": 'application/json',
+            },
+        }).then(response=>{
+            console.log('candlestick fetched')
+            if(response.ok){
+                response.json().then(json=>{
+                    callback(values.status.ok,json)
+                })
+            }else{
+                callback(values.status.error,[])
+            }
+        }).catch((error)=>{
+            callback(values.status.error,[])
+            console.log(error)
+        })
     }
 }
