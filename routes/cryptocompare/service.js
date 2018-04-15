@@ -100,17 +100,17 @@ module.exports={
         data.map(row=>{
             var ob={}
             var i=0
-            ob[id.binance.id]=row[i++]
-            ob[id.binance.open]=row[i++]
-            ob[id.binance.high]=row[i++]
-            ob[id.binance.low]=row[i++]
-            ob[id.binance.close]=row[i++]
-            ob[id.binance.volume]=row[i++]
-            ob[id.binance.close_time]=row[i++]
-            ob[id.binance.quote_asset_volume]=row[i++]
-            ob[id.binance.number_of_trades]=row[i++]
-            ob[id.binance.taker_buy_base_asset_volume]=row[i++]
-            ob[id.binance.taker_buy_quote_asset_volume]=row[i++]
+            ob[id.binance.id]=parseInt(row[i++])
+            ob[id.binance.open]=parseFloat(row[i++])
+            ob[id.binance.high]=parseFloat(row[i++])
+            ob[id.binance.low]=parseFloat(row[i++])
+            ob[id.binance.close]=parseFloat(row[i++])
+            ob[id.binance.volume]=parseFloat(row[i++])
+            ob[id.binance.close_time]=parseFloat(row[i++])
+            ob[id.binance.quote_asset_volume]=parseFloat(row[i++])
+            ob[id.binance.number_of_trades]=parseFloat(row[i++])
+            ob[id.binance.taker_buy_base_asset_volume]=parseFloat(row[i++])
+            ob[id.binance.taker_buy_quote_asset_volume]=parseFloat(row[i++])
             if(isNew){
                 if(ob[id.binance.id]>entryTime){
                     list.push(ob)

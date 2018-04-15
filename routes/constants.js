@@ -10,6 +10,7 @@ module.exports = {
         
         binance:{
             ticker24h:(from,to)=>`https://api.binance.com/api/v1/ticker/24hr?symbol=${from}${to}`,
+            ticker24hAll:`https://api.binance.com/api/v1/ticker/24hr`,
             candleStick:(from,to,interval,fromTime,toTime)=>`https://api.binance.com/api/v1/klines?symbol=${from}${to}&interval=${interval}&startTime=${fromTime}&endTime=${toTime}`,
 
         },

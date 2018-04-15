@@ -123,7 +123,11 @@ module.exports={
     },
     get24HrTicker(from,to,callback){
         console.log('fetching 24hrs ticker price')
-        fetch(network.binance.ticker24h(from,to),{
+        var url=network.binance.ticker24h(from,to)
+        if(from==undefined||to==undefined){
+            url=network.binance.ticker24hAll
+        }
+        fetch(url,{
             method: 'GET',
             headers: {
                 "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
