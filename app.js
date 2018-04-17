@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-var cryptoCompare = require('./routes/CryptoCompare/cryptoCompare')
+var cryptoCompare = require('./routes/cryptocompare/cryptoCompare')
 var twitter = require('./routes/twitter/twitter')
 var news = require('./routes/news/news')
 var mailer = require('./routes/mailer/mailer')
@@ -36,17 +36,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 /** setting up cors options */
 var cors = require('cors')
 
-app.use(cors())
 
+/** Initialize database */
+database.createGoodbadTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
+database.createSentimentTrendTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
+database.createTweetsTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
+
+
+/** Initialize url paths */
+app.use(cors())
 app.use('/', index);
 app.use('/news', news);
 app.use('/cc',cryptoCompare);
 app.use('/twitter',twitter);
 app.use('/mailer',mailer)
 app.use('/forecast',forecast)
-
-
-
 
 
 
