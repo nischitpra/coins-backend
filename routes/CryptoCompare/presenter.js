@@ -9,7 +9,7 @@ const service = require('./service')
 module.exports={
     updateCandleStick(from,to,interval,isNew,callback,lock_callback){
         if(isNew){
-            db.find(`select * from ${id.database.cc.history_from_to_type(from,to,interval)} order by _id desc limit 1`,(status,data)=>{
+            db.find(`select * from ${id.database.cc.history_from_to_type(from,to,interval)} order by _id desc limit 1;`,(status,data)=>{
                 if(status==values.status.ok){
                     if(data.length>0){
                         console.log('if is new')
@@ -28,7 +28,7 @@ module.exports={
                 }
             })
         }else{
-            db.find(`select * from ${id.database.cc.history_from_to_type(from,to,interval)} order by _id asc limit 1`,(status,data)=>{
+            db.find(`select * from ${id.database.cc.history_from_to_type(from,to,interval)} order by _id asc limit 1;`,(status,data)=>{
                 if(status==values.status.ok){
                     if(data.length>0){
                         console.log('if')
@@ -51,7 +51,7 @@ module.exports={
     getCandleStick(from,to,interval,fromTime,toTime,isNew,callback,lock,lock_callback){
         console.log(`isNew: ${isNew} from time: ${fromTime} totime: ${toTime} key: ${id.database.cc.history_from_to_type(from,to,interval)}`)
         console.log(`db.${id.database.cc.history_from_to_type(from,to,interval)}.find(${JSON.stringify({[id.database.cc.id]:{$gte:fromTime,$lte:toTime}})}).sort(${JSON.stringify({[id.database.cc.id]:1})})`)
-        db.find(`select * from ${id.database.cc.history_from_to_type(from,to,interval)} order by _id asc`,(status,data)=>{
+        db.find(`select * from ${id.database.cc.history_from_to_type(from,to,interval)} order by _id asc;`,(status,data)=>{
             if(status==values.status.ok){
                 console.log(`data length: ${data.length}`)
                 if(data.length>0){
