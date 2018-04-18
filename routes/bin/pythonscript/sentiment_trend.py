@@ -1,9 +1,6 @@
 import pandas as pd
-from pymongo import MongoClient
-from bson.objectid import ObjectId
+import psycopg2
 import sys
-import json
-import pandas as pd
 import base64
 
 connection=psycopg2.connect("postgres://popo:weareawesome@popo-server.ckhrqovrxtw4.us-east-1.rds.amazonaws.com:5432/coins")
@@ -14,10 +11,10 @@ window_size=60*60 # per hour
 
 
 # Loading data and preparation
-cur.execute('select * from sentiment_trend order by cast(time as int) desc limit 1;')
+cur.execute('select * from sentiment_trend order by cast(time as BIGINT) desc limit 1;')
 last_insert=list(cur.fetchall())
 if len(last_insert)>0:
-    cur.execute('select * from good_bad_tweets inner join sentiment_trend on cast(good_bad_tweets._id as int) > {} order by cast(timestamp as int) asc;'.format(last_insert[0][0]))    
+    cur.execute('select * from good_bad_tweets inner join sentiment_trend on cast(good_bad_tweets._id as BIGINT) > {} order by cast(timestamp as BIGINT) asc;'.format(last_insert[0][0]))    
     m_df=pd.DataFrame(list(cur.fetchall()))
 else:
     cur.execute('select * from good_bad_tweets;')    
