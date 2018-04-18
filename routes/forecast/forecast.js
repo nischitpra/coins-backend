@@ -8,8 +8,8 @@ const string = require('../constants').string
 const WebSocket = require('ws')
 const service = require('./service')
 
-// for general search tweets
-router.get('/q', function(req, res, next) {
+// update forecast
+router.get('/uf', function(req, res, next) {
     var from=req.query[id.params.from]
     var to=req.query[id.params.to]
     var type=req.query[id.params.type]
@@ -18,6 +18,23 @@ router.get('/q', function(req, res, next) {
     if(type==undefined) type="2"
 
     pythoninvoker.updateForecastHistory(id.database.cc.history_from_to_type(from,to,type),(status,message)=>{
+        res.json({
+            status:status,
+            message: message
+        })
+    })
+});
+
+// get forecast
+router.get('/q', function(req, res, next) {
+    var from=req.query[id.params.from]
+    var to=req.query[id.params.to]
+    var type=req.query[id.params.type]
+    if(from==undefined) from="BTC"
+    if(to==undefined) to="USD"
+    if(type==undefined) type="2"
+
+    presenter.getHistory(id.database.cc.history_from_to_type(from,to,type),(status,message)=>{
         res.json({
             status:status,
             message: message

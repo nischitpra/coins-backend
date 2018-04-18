@@ -5,19 +5,21 @@ import numpy as np
 import math
 from datetime import datetime
 import re
-from nltk.corpus import stopwords
 from nltk.stem.snowball import EnglishStemmer
 import pickle
-from pymongo import MongoClient
-from bson.objectid import ObjectId
+import psycopg2
+import pandas as pd
+import base64
 
+connection=psycopg2.connect("postgres://popo:weareawesome@popo-server.ckhrqovrxtw4.us-east-1.rds.amazonaws.com:5432/coins")
+cur=connection.cursor()
 
-base_path='/Users/oyo/Desktop/awesome/tweets/'
+base_path='/Users/oyo/Desktop/awesome/express/coins/routes/bin/pythonscript'
 HISTORY_TYPE=1*60*60*24 #1 day
 
 
 stemmer = EnglishStemmer()
-stop_words = stopwords.words('english')
+stop_words = pickle.load(open(base_path+'/saved_classifier/stopwords.sav', 'rb'))
 my_stop_words='to and http https com co www'
 stop_words=stop_words+my_stop_words.split()
 
@@ -53,79 +55,76 @@ def sentiment(timestamp,df):
     probability=classifier.predict_proba(p_df['text'])
     
     proba_df=pd.DataFrame()
-    oth_spam_df=pd.DataFrame()
     for i,row in enumerate(probability):
-        if np.argmax(row)==0:
+        if row[0]>0.5 and np.argmax(row)==0: # good 
             proba_df=proba_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':0,'probability':row[0]},ignore_index=True)
-        elif np.argmax(row)==1: 
+        elif row[1]>0.5 and np.argmax(row)==1: # bad
             proba_df=proba_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':1,'probability':row[1]},ignore_index=True)
+        elif row[4]>0.5 and np.argmax(row)==4: # less good
+            proba_df=proba_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':4,'probability':row[4]},ignore_index=True)
         elif np.argmax(row)==2:
-            oth_spam_df=oth_spam_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':2,'probability':row[2]},ignore_index=True)
+            proba_df=proba_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':2,'probability':row[2]},ignore_index=True)
         else:
-            oth_spam_df=oth_spam_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':3,'probability':row[3]},ignore_index=True)
+            proba_df=proba_df.append({'_id':p_df['_id'].iloc[i],'timestamp':p_df['timestamp'].iloc[i],'category':3,'probability':row[3]},ignore_index=True)
 
-    proba_df.to_csv(base_path+'dataset/csv/good_bad/filtered/{}_good_bad.csv'.format(timestamp), sep=',', index=False)
-    oth_spam_df.to_csv(base_path+'dataset/csv/good_bad/filtered/{}_oth_spam_news.csv'.format(timestamp), sep=',', index=False)
-    return [proba_df,oth_spam_df]
+    return [proba_df]
 
-# Mongodb settings
-client = MongoClient()
-client = MongoClient('localhost', 27017)
-db = client.coins
 
 # Twitter Dataset
-gb_l=list(db.good_bad_tweets.find().sort('_id',1))
-smp_l=list(db.other_spam_tweets.find().sort('_id',1))
+cur.execute("select * from good_bad_tweets order by _id asc limit 1")
+gb_l = list(cur.fetchall())
 
-record_exists=len(gb_l)>0 or len(smp_l)>0
+record_exists=len(gb_l)>0
 
 if record_exists:
-    last_id=gb_l[-1]['_id'] if gb_l[-1]['_id']>smp_l[-1]['_id'] else smp_l[-1]['_id']
-    main_df=pd.DataFrame(list(db.tweets.find({'_id': {'$gt': ObjectId(last_id)}}).sort('_id',1)))
+    last_id=gb_l[-1][0]
+    cur.execute("select * from tweets where _id>{} order by _id asc".format(last_id))
+    main_df = pd.DataFrame(list(cur.fetchall()))
+    main_df.columns = ['_id','created_at','id_str','text','name','screen_name','profile_image_url','timestamp_ms']
+    main_df['text'] = main_df['text'].apply(lambda tweet: base64.b64decode(tweet))
 else:
-    main_df=pd.DataFrame(list(db.tweets.find().sort('_id',1)))
+    cur.execute("select * from tweets order by _id asc")
+    main_df = pd.DataFrame(list(cur.fetchall()))
+    main_df.columns = ['_id','created_at','id_str','text','name','screen_name','profile_image_url','timestamp_ms']
+    main_df['text'] = main_df['text'].apply(lambda tweet: base64.b64decode(tweet))
     
 if main_df.empty:
+    print('no values to process')
     sys.exit()
-    
+
 main_df=main_df.drop_duplicates(subset=['_id'], keep='first')
 
-
-tweet_dataset=main_df[['_id','text','created_at']].copy()
+tweet_dataset=main_df[['_id','text','timestamp_ms']].copy()
 tweet_dataset.columns = ['_id', 'text','timestamp']
-tweet_dataset['timestamp']=pd.to_datetime(tweet_dataset['timestamp'])
-tweet_dataset['timestamp'] = [time_to_milli(_time) for _time in tweet_dataset['timestamp']] 
+tweet_dataset['timestamp']=tweet_dataset['timestamp'].apply(lambda time:int(time))
 tweet_df = tweet_dataset.sort_values(['timestamp'], ascending=True)
 
 # Saved Model
-classifier = pickle.load(open(base_path+'saved_classifier/good_bad_classifier.sav', 'rb'))
+classifier = pickle.load(open(base_path+'/saved_classifier/good_bad_classifier.sav', 'rb'))
 
 # Main Loop
-current_date=tweet_df['timestamp'].iloc[0]
-last_date=tweet_df['timestamp'].iloc[-1]
+current_date=int(tweet_df['timestamp'].iloc[0])
+last_date=int(tweet_df['timestamp'].iloc[-1])
 step=HISTORY_TYPE
 
-
 final_proba_df=pd.DataFrame()
-final_oth_spam_df=pd.DataFrame()
 
 for time_milli in range(current_date,last_date+step,step):
     day_tweets=slice_tweets(tweet_df,time_milli)
     x=sentiment(time_milli,day_tweets.copy())
     if x!=None:
-        [proba_df,oth_spam_df]=x
+        [proba_df]=x
         final_proba_df=pd.concat([final_proba_df,proba_df])
-        final_oth_spam_df=pd.concat([final_oth_spam_df,oth_spam_df])
 
-if not final_oth_spam_df.empty:
-    final_oth_spam_df=final_oth_spam_df.drop_duplicates(['_id'],keep='first')
+        
 if not final_proba_df.empty:
     final_proba_df=final_proba_df.drop_duplicates(['_id'],keep='first')
-
-if not final_oth_spam_df.empty:
-    db.other_spam_tweets.insert_many(final_oth_spam_df.to_dict(orient='records'))
-if not final_proba_df.empty:
-    db.good_bad_tweets.insert_many(final_proba_df.to_dict(orient='records'))
+    query=[]
+    for index, row in final_proba_df.iterrows():
+        query.append('({},{},{},{})'.format(int(row['_id']),int(row['category']),round(row['probability'],6),int(row['timestamp'])))
+    query=','.join(query)
+    cur.execute("insert into good_bad_tweets (_id,category,probability,timestamp) values {}".format(query))
+    connection.commit()
     print('{} rows filtered'.format(final_proba_df.shape[0]))
 else:
     print('no rows filtered')

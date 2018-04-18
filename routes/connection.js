@@ -2,7 +2,9 @@ const network = require('./constants').network
 const values = require('./constants').values
 const string = require('./constants').string
 const id = require('./constants').id
+const utils = require('./utils')
 const fetch = require('node-fetch')
+
 
 module.exports={
     getNews(type,count,page,callback){
@@ -19,7 +21,7 @@ module.exports={
             if(response.ok){
                 response.json().then(json=>{
                     console.log('sending data back')
-                    callback(values.status.on,json[id.news.articles])
+                    callback(values.status.ok,json[id.news.articles])
                 })
             }
         }).catch((error)=>{
@@ -107,7 +109,16 @@ module.exports={
         console.log('streaming tweets from twitter api')
         client.stream('statuses/filter', {track: `${symbol}`},  function(stream) {
             stream.on('data', function(tweet) {
-                bufferTweets.push(tweet)
+                const tweet_obj={}
+                tweet_obj[id.database.collection.keyList.tweets[0]]=tweet.created_at
+                tweet_obj[id.database.collection.keyList.tweets[1]]=tweet.id_str
+                tweet_obj[id.database.collection.keyList.tweets[2]]=utils.base64(tweet.text)
+                tweet_obj[id.database.collection.keyList.tweets[3]]=utils.base64(tweet.user.name)
+                tweet_obj[id.database.collection.keyList.tweets[4]]=utils.base64(tweet.user.screen_name)
+                tweet_obj[id.database.collection.keyList.tweets[5]]=utils.base64(tweet.user.profile_image_url)
+                tweet_obj[id.database.collection.keyList.tweets[6]]=tweet.timestamp_ms
+
+                bufferTweets.push(tweet_obj)
                 console.log(bufferTweets.length);
                 console.log(tweet.text)
                 if(bufferTweets.length>50){
@@ -120,5 +131,51 @@ module.exports={
                 console.log(error);
             });
         });
+    },
+    get24HrTicker(from,to,callback){
+        console.log('fetching 24hrs ticker price')
+        var url=network.binance.ticker24h(from,to)
+        if(from==undefined||to==undefined){
+            url=network.binance.ticker24hAll
+        }
+        fetch(url,{
+            method: 'GET',
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
+                "Accept": 'application/json',
+            },
+        }).then(response=>{
+            console.log('ticker fetched')
+            if(response.ok){
+                response.json().then(json=>{
+                    callback(values.status.ok,json)
+                })
+            }
+        }).catch((error)=>{
+            callback(values.status.error,[])
+            console.log(error)
+        })
+    },
+    getCandleStick(from,to,interval,fromTime,toTime,callback){
+        console.log(`${network.binance.candleStick(from,to,interval,fromTime,toTime)}`)
+        fetch(network.binance.candleStick(from,to,interval,fromTime,toTime),{
+            method: 'GET',
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0",
+                "Accept": 'application/json',
+            },
+        }).then(response=>{
+            console.log('candlestick fetched')
+            if(response.ok){
+                response.json().then(json=>{
+                    callback(values.status.ok,json)
+                })
+            }else{
+                callback(values.status.error,[])
+            }
+        }).catch((error)=>{
+            callback(values.status.error,[])
+            console.log(error)
+        })
     }
 }

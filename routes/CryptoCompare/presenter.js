@@ -2,36 +2,73 @@ const id = require('../constants').id
 const string = require('../constants').string
 const values = require('../constants').values
 const connection = require('../connection')
+const db = require('../database')
+const service = require('./service')
 
 
 module.exports={
-    getHistory(type,from,to,exchange,fromTime,toTime,callback){
-        if(fromTime==null){
-            this.getOldHistory(type,from,to,exchange,toTime,callback)
-        }else if(toTime==null){
-            this.getNewHistory(type,from,to,exchange,fromTime,callback)
+    updateCandleStick(from,to,interval,isNew,callback,lock_callback){
+        if(isNew){
+            db.find(`select * from ${id.database.cc.history_from_to_type(from,to,interval)} order by _id desc limit 1`,(status,data)=>{
+                if(status==values.status.ok){
+                    if(data.length>0){
+                        console.log('if is new')
+                        const fromTime=data[0][id.binance.id]+1
+                        const toTime=new Date().getTime()
+                        service.updateCandleStick(from,to,interval,fromTime,toTime,isNew,callback,lock_callback)
+                    }else{
+                        console.log('if is old')
+                        const toTime=new Date().getTime()
+                        const fromTime=toTime-values.binance.candle_interval_milliseconds[`_${interval}`]*500
+                        service.updateCandleStick(from,to,interval,fromTime,toTime,isNew,callback,lock_callback)
+                    }
+                }else{
+                    lock_callback(false)
+                    callback(status,data)
+                }
+            })
         }else{
-            callback(values.status.error,[])
+            db.find(`select * from ${id.database.cc.history_from_to_type(from,to,interval)} order by _id asc limit 1`,(status,data)=>{
+                if(status==values.status.ok){
+                    if(data.length>0){
+                        console.log('if')
+                        const toTime=data[0][id.binance.id]-1
+                        const fromTime=toTime-values.binance.candle_interval_milliseconds[`_${interval}`]*500
+                        service.updateCandleStick(from,to,interval,fromTime,toTime,isNew,callback,lock_callback)
+                    }else{
+                        console.log('else')
+                        const toTime=new Date().getTime()
+                        const fromTime=toTime-values.binance.candle_interval_milliseconds[`_${interval}`]*500
+                        service.updateCandleStick(from,to,interval,fromTime,toTime,isNew,callback,lock_callback)
+                    }
+                }else{
+                    lock_callback(false)
+                    callback(status,data)
+                }
+            })
         }
-        
     },
-    getOldHistory(type,from,to,exchange,toTime,callback){
-        connection.getHistory(id.cryptocompare.history[type],from,to,exchange,toTime,callback)
+    getCandleStick(from,to,interval,fromTime,toTime,isNew,callback,lock,lock_callback){
+        console.log(`isNew: ${isNew} from time: ${fromTime} totime: ${toTime} key: ${id.database.cc.history_from_to_type(from,to,interval)}`)
+        console.log(`db.${id.database.cc.history_from_to_type(from,to,interval)}.find(${JSON.stringify({[id.database.cc.id]:{$gte:fromTime,$lte:toTime}})}).sort(${JSON.stringify({[id.database.cc.id]:1})})`)
+        db.find(`select * from ${id.database.cc.history_from_to_type(from,to,interval)} order by _id asc`,(status,data)=>{
+            if(status==values.status.ok){
+                console.log(`data length: ${data.length}`)
+                if(data.length>0){
+                    callback(status,data)
+                }else{
+                    if(!lock){
+                        console.log(`no data found, updating candle stick`)
+                        lock_callback(true)
+                        this.updateCandleStick(from,to,interval,isNew,callback,lock_callback)
+                    }else{
+                        callback(values.status.error,string.functionLocked)
+                    }
+                }
+            }else{
+                callback(status,data)            
+            }
+        })
     },
-    getNewHistory(_id,from,to,exchange,fromTime,callback){
 
-    },
-
-
-    getFavourites(from,to,exchange,callback){
-        connection.getFavourites(from,to,exchange,callback)
-    },
-    getCoinList(callback){
-        connection.getCoinList(callback)
-    },
-    getSubsList(from,to,callback){
-        connection.getSocketScubscriptionList(from,to,callback)
-    },
-
-   
 }

@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-var cryptoCompare = require('./routes/CryptoCompare/cryptoCompare')
+var cryptoCompare = require('./routes/cryptocompare/cryptoCompare')
 var twitter = require('./routes/twitter/twitter')
 var news = require('./routes/news/news')
 var mailer = require('./routes/mailer/mailer')
@@ -35,21 +35,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 /** setting up cors options */
 var cors = require('cors')
-var corsOptions = {
-  origin: 'http://localhost:3000',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204 
-}
 
 
-app.use('/',cors(corsOptions), index);
-app.use('/news',cors(corsOptions), news);
-app.use('/cc',cors(corsOptions),cryptoCompare);
-app.use('/twitter',cors(corsOptions),twitter);
-app.use('/mailer',cors(corsOptions),mailer)
-app.use('/forecast',cors(corsOptions),forecast)
+/** Initialize database */
+database.createGoodbadTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
+database.createSentimentTrendTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
+database.createTweetsTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
+database.createOTPTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
+database.createSubscribedTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
 
-
-
+/** Initialize url paths */
+app.use(cors())
+app.use('/', index);
+app.use('/news', news);
+app.use('/cc',cryptoCompare);
+app.use('/twitter',twitter);
+app.use('/mailer',mailer)
+app.use('/forecast',forecast)
 
 
 

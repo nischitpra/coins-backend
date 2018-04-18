@@ -8,9 +8,9 @@ const ObjectID = require('mongodb').ObjectID
 
 
 module.exports={
-    getHistory(from,to,type,callback){
-        console.log(`getting history for ${name} ${from}`)
-        db.findOne(id.database.collection.history,{[id.database.cc.id]:id.database.cc.history_from_to_type(from,to,type)},(status,data)=>{
+    getHistory(key,callback){
+        console.log(`getting forecast history for ${key}`)
+        db.findOne(id.database.collection.forecast,{[id.database.cc.id]:key},(status,data)=>{
             if(status==values.status.ok){
                 callback(status,data[id.database.cc.history])
             }else{
