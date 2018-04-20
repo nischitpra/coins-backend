@@ -7,7 +7,7 @@ connection=psycopg2.connect("postgres://popo:weareawesome@popo-server.ckhrqovrxt
 cur=connection.cursor()
 
 base_path='/Users/oyo/Desktop/awesome/express/coins/routes/bin/pythonscript'
-window_size=60*60 # per hour
+window_size=60*1000 # per hour
 
 
 # Loading data and preparation
@@ -69,7 +69,9 @@ for i in range(df.shape[0]):
     elif float(df['category'].iloc[i])==1.0:
         close-=float(df['probability'].iloc[i])
     elif float(df['category'].iloc[i])==4.0:
-        close+=float(df['probability'].iloc[i])*0.25
+        close+=float(df['probability'].iloc[i])*0.25 # less good
+    elif float(df['category'].iloc[i])==5.0:
+        close-=float(df['probability'].iloc[i])*0.5 # less bad
     low=close if close<low else low
     high=close if close>high else high
 
