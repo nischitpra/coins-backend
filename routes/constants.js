@@ -31,12 +31,14 @@ module.exports = {
             sentimentTrend:`pythonscript/sentiment_trend.py`,
             filterTweet:`pythonscript/filter_tweet.py`,
             goodBadTweet:`pythonscript/good_bad_tweet.py`,
-            forecaster:`pythonscript/forecaster/model.py`,
+            forecaster:`pythonscript/forecaster/model_latest_trend.py`,
+            velvoCalculator:`pythonscript/velvo_calculator.py`,
             binance:{
                 candlestick:`pythonscript/binance/candlestick.py`
             },
         },
         buildPath:(pathFromBin)=>`/Users/oyo/Desktop/awesome/express/coins/routes/bin/${pathFromBin}`,
+        buildPathImage:(name)=>`/Users/oyo/Desktop/awesome/express/coins/public/images/${name}`,
     },
 
     values:{
