@@ -53,11 +53,10 @@ app.use('/m',mailer.router)
 app.use('/f',forecast)
 
 /** Initialize update sucscribed candlestick services */
-cryptoCompare.uscs(0)
 cryptoCompare.uscs(1)
 
 /** Initialize 4 Day summary mailer */
-mailer.summary4Days()
+mailer.summary4Days((status,message)=>{ console.log(`status: ${status}, message: ${message}`) })
 
 
 // catch 404 and forward to error handler
