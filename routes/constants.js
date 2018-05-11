@@ -27,7 +27,7 @@ module.exports = {
     },
     files:{
         python:{
-            compiler:'/usr/local/Cellar/python/3.6.4_2/bin/python3.6',
+            compiler:'/usr/local/Cellar/python/3.6.5/bin/python3.6',
             sentimentTrend:`pythonscript/sentiment_trend.py`,
             filterTweet:`pythonscript/filter_tweet.py`,
             goodBadTweet:`pythonscript/good_bad_tweet.py`,
@@ -37,8 +37,8 @@ module.exports = {
                 candlestick:`pythonscript/binance/candlestick.py`
             },
         },
-        buildPath:(pathFromBin)=>`/Users/oyo/Desktop/awesome/express/coins/routes/bin/${pathFromBin}`,
-        buildPathImage:(name)=>`/Users/oyo/Desktop/awesome/express/coins/public/images/${name}`,
+        buildPath:(pathFromBin)=>`/Users/nischit/Desktop/awesome/express/coins/routes/bin/${pathFromBin}`,
+        buildPathImage:(name)=>`/Users/nischit/Desktop/awesome/express/coins/public/images/${name}`,
     },
 
     values:{
@@ -111,7 +111,8 @@ module.exports = {
             exchange:'e',
             toTime:'tt',
             fromTime:'ft',
-            isNew:'n'
+            isNew:'n',
+            filterType:'filt',
         },
         binance:{
             id:'_id',
@@ -138,6 +139,8 @@ module.exports = {
                 sentimentTrend:'sentiment_trend',
                 history:'history',
                 forecast:'forecast',
+                trend:'trend',
+                volatility:'volatility',
                 history_from_to_type:(from,to,type)=>`${from}_${to}_${type}`,
                 trend_velocity:(from,to)=>`trend_velocity`,
                 dump:{

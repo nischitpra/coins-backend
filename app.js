@@ -42,6 +42,8 @@ database.createSentimentTrendTable((status,message)=>{console.log(`status: ${sta
 database.createTweetsTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
 database.createOTPTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
 database.createSubscribedTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
+database.createTrendTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
+database.createVolatilityTable((status,message)=>{console.log(`status: ${status}, message: ${message}`)})
 
 /** Initialize url paths */
 app.use(cors())

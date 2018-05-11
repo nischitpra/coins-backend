@@ -7,7 +7,7 @@ import re
 from nltk.corpus import stopwords
 from nltk.stem.snowball import EnglishStemmer
 
-base_path='/Users/oyo/Desktop/awesome/express/coins/routes/bin/pythonscript'
+base_path='/Users/nischit/Desktop/awesome/express/coins/routes/bin/pythonscript'
 
 
 stemmer = EnglishStemmer()

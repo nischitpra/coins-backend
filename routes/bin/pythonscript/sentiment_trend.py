@@ -6,7 +6,7 @@ import base64
 connection=psycopg2.connect("postgres://popo:weareawesome@popo-server.ckhrqovrxtw4.us-east-1.rds.amazonaws.com:5432/coins")
 cur=connection.cursor()
 
-base_path='/Users/oyo/Desktop/awesome/express/coins/routes/bin/pythonscript'
+base_path='/Users/nischit/Desktop/awesome/express/coins/routes/bin/pythonscript'
 window_size=1*60*60*1000 # per hour
 
 
