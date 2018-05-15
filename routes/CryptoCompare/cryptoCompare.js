@@ -8,7 +8,9 @@ const string = require('../constants').string
 const db = require('../database')
 // const WebSocket = require('ws')
 
-var lock=false
+/** lock is made into an array so as to accomodate multiple updates to different talbes. */
+var lock=[]
+
 var intervalList={
     _1m:undefined,
     _1h:undefined,
@@ -47,8 +49,6 @@ router.get('/gcs', function(req, res, next) {
 router.get('/t', function(req, res, next) {
     var from=req.query[id.params.from]
     var to=req.query[id.params.to]
-    from=(from==undefined||from==null)?'XRP':from
-    to=(to==undefined||to==null)?'BTC':to
     
     service.get24HrTicker(from,to,(status,data)=>res.json({
             status:status,
